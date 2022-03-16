@@ -5,7 +5,7 @@ Boids implementation
 
 
 
-### Links for research
+### Links for research and further reading
 [Stanford](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html)  
 [Ben Eater site](https://eater.net/boids)  
 [Ben Eater GH](https://github.com/beneater/boids)  
