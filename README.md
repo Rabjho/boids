@@ -13,3 +13,6 @@ Boids implementation
 [Boids wiki](https://en.wikipedia.org/wiki/Boids)  
 [A JavaScript canvas implementation](https://jumpoff.io/blog/implementing-boids-in-javascript-canvas)  
 [Playlist of videos going over boids](https://youtube.com/playlist?list=PLEqmTbm4dfsM8BJ1kMUZbDsssCvEdulB3)
+
+
+[Use Godot engine w/GDScript](https://godotengine.org/)
