@@ -10,36 +10,48 @@ class Boid:
         self.radius = radius
         self.rotation = rotation
         self.angle = 120
-        self.color = [255,0,0]
+        self.color = (29,222,85)
+        self.color = "#5a8ff5"
+        self.velocity = pg.Vector2(0,0)
 
     def live(self):
+        self.position = self.position + self.velocity
+
 
         self.tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
         self.rWingTip = [self.position.x + self.rotation.rotate(self.angle).x * self.radius / 2, self.position.y + self.rotation.rotate(self.angle).y * self.radius / 2]
         self.lWingTip = [self.position.x + self.rotation.rotate(-self.angle).x * self.radius / 2, self.position.y + self.rotation.rotate(-self.angle).y * self.radius / 2]
 
-        gfxdraw.filled_polygon(self.surface, [self.tip, self.rWingTip, self.position, self.lWingTip], self.color)
-        gfxdraw.aapolygon(self.surface, [self.tip, self.rWingTip, self.position, self.lWingTip], self.color)
+        gfxdraw.filled_polygon(self.surface, [self.tip, self.rWingTip, self.position, self.lWingTip], pg.Color(self.color))
+        gfxdraw.aapolygon(self.surface, [self.tip, self.rWingTip, self.position, self.lWingTip], pg.Color(self.color))
 
   
 def main():
     print("main")
     pg.init()
 
-    clock = pg.time.Clock()
+
 
     size = [500,500]
-
     screen = pg.display.set_mode(size)
+    backgroundColour = "#282c34"
+
+
+    pg.display.set_caption('Boids')
+    Icon = pg.image.load('Assets/Logo.png')
+    pg.display.set_icon(Icon)
+    clock = pg.time.Clock()
+
+
     
-    boid1 = Boid(screen, pg.Vector2(250,250), 50)
+    boid1 = Boid(screen, pg.Vector2(250,250), 10)
 
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 sys.exit()
 
-        screen.fill((255,255,255))
+        screen.fill(backgroundColour)
         boid1.live()
         clock.tick(60)
         pg.display.flip()
