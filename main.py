@@ -1,7 +1,9 @@
-from random import randrange
 import sys,pygame as pg
-from pygame import gfxdraw
 from entities import *
+
+from random import randrange
+from pygame import gfxdraw
+
 
 def main():
     print("main")
@@ -26,7 +28,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 sys.exit()
-        clock.tick()
+        clock.tick(60)
 
         screen.fill(backgroundColour)
 

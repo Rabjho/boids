@@ -7,7 +7,6 @@ from auxfunctions import *
 class Entity:
     # size is the size from the center to the "tip" of the entity
     def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1)):
-        self.id = id
         self.surface = surface
         self.position = position
         self.radius = radius
@@ -17,6 +16,9 @@ class Entity:
         self.color = "#5a8ff5"
         self.velocity = pg.Vector2(0,0)
         self.clock = pg.time.Clock()
+
+        self.rWingVector = self.rotation.rotate(self.angle)
+        self.lWingVector = self.rotation.rotate(-self.angle)
 
     def draw(self):
         self.tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
@@ -69,7 +71,7 @@ class Boid(Entity):
         self.vLimit = vLimit
 
     def movement(self):
-        self.activeEffects = [self.cohesion()*1, self.seperation(), self.alignment(), self.randomness()]
+        self.activeEffects = [self.cohesion()*2, self.seperation(), self.alignment(), self.randomness()]
         
         for effect in self.activeEffects:
             self.velocity += effect
@@ -89,7 +91,7 @@ class Boid(Entity):
 
         # TODO Change searchArea to a more pie-esque shape by adding another boolean:
         # Checking the if the polar coordinates of the vector between self and boid has an angle that is within the angles of the r/l wing vectors
-        self.boidsInRange = [boid for boid in self.boids if inCircle(boid.position,self.position, self.searchRadius) and boid.position != self.position]
+        self.boidsInRange = [boid for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.rWingVector.as_polar()[1], self.lWingVector.as_polar()[1]) == False and inCircle(boid.position,self.position, self.searchRadius) and boid.position != self.position]
 
         super().live()
 
@@ -120,4 +122,4 @@ class Boid(Entity):
     # TODO Create better representing searchArea demo. Maybe look at these: 
     # pg.gfxdraw.pie
     def demonstrate(self):
-        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,10))
+        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,150))
