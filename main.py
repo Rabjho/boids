@@ -9,7 +9,7 @@ def main():
 
     size = [500,500]
     screen = pg.display.set_mode(size)
-    backgroundColour = "#282c34"
+    backgroundColour = "#3E4D66"
 
     pg.display.set_caption('Boids')
     Icon = pg.image.load('Assets/Logo.png')

@@ -4,7 +4,6 @@ from random import randrange
 from auxfunctions import *
 
 
-
 class Entity:
     # size is the size from the center to the "tip" of the entity
     def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1)):
