@@ -1,6 +1,6 @@
 import sys,pygame as pg
 from pygame import gfxdraw
-from random import randrange, uniform
+from random import randrange, uniform, getrandbits
 from auxfunctions import *
 
 
@@ -19,7 +19,8 @@ class Entity:
         self.rWingVector = self.rotation.rotate(self.angle)
         self.lWingVector = self.rotation.rotate(-self.angle)
 
-        self.antiAliasing = antiAliasing 
+        self.antiAliasing = antiAliasing
+        self.noClip = True
 
 
     def draw(self):
@@ -43,24 +44,32 @@ class Entity:
         self.position = self.position + self.velocity * self.deltaTime
 
         if (self.position.x > self.surface.get_width()):
-            # self.position.x = self.surface.get_width()
-            # self.velocity.x *= -1
-            self.position.x = 0
+            if (self.noClip):
+                self.position.x = 0
+            else:
+                self.position.x = self.surface.get_width()
+                self.velocity.x *= -1
 
         if (self.position.x < 0):
-            # self.position.x = 0
-            # self.velocity.x *= -1
-            self.position.x = self.surface.get_width()
+            if (self.noClip):
+                self.position.x = self.surface.get_width()
+            else:
+                self.position.x = 0
+                self.velocity.x *= -1
 
         if (self.position.y > self.surface.get_height()):
-            # self.position.y = self.surface.get_height()
-            # self.velocity.y *= -1
-            self.position.y = 0
+            if (self.noClip):
+                self.position.y = 0
+            else:
+                self.position.y = self.surface.get_height()
+                self.velocity.y *= -1
 
         if (self.position.y < 0):
-            # self.position.y = 0
-            # self.velocity.y *= -1
-            self.position.y = self.surface.get_height()
+            if (self.noClip):
+                self.position.y = self.surface.get_height()
+            else:
+                self.position.y = 0
+                self.velocity.y *= -1
             
 
 

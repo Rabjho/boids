@@ -1,7 +1,6 @@
 import sys,pygame as pg
 from entities import *
-
-from random import randrange
+import random
 from pygame import gfxdraw
 
 
@@ -13,7 +12,7 @@ def main():
     screen = pg.display.set_mode(size)
     backgroundColour = "#3E4D66"
     demonstrate = False
-
+    mode = 0
 
     pg.display.set_caption('Boids')
     Icon = pg.image.load('Assets/Logo.png')
@@ -35,6 +34,21 @@ def main():
                     main()
                 if (event.key == pg.K_d):
                     demonstrate = not demonstrate
+                if (event.key == pg.K_m):
+                    if (mode == 0):                        
+                        for boid in boids:
+                            boid.noClip = False
+                        mode += 1
+                    elif (mode == 1):
+                        for boid in boids:
+                            boid.noClip = bool(random.getrandbits(1))
+                        mode += 1
+                    elif (mode == 2):
+                        for boid in boids:
+                            boid.noClip = True
+                        mode = 0
+                        
+
 
 
         clock.tick(60)
