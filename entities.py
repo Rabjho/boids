@@ -42,20 +42,25 @@ class Entity:
 
         self.position = self.position + self.velocity * self.deltaTime
 
-        if (self.position.x >= self.surface.get_width()):
-            self.position.x = self.surface.get_width()
-            self.velocity.x *= -1
-        if (self.position.x <= 0):
+        if (self.position.x > self.surface.get_width()):
+            # self.position.x = self.surface.get_width()
+            # self.velocity.x *= -1
             self.position.x = 0
-            self.velocity.x *= -1
 
-        if (self.position.y >= self.surface.get_height()):
-            self.position.y = self.surface.get_height()
-            self.velocity.y *= -1
+        if (self.position.x < 0):
+            # self.position.x = 0
+            # self.velocity.x *= -1
+            self.position.x = self.surface.get_width()
 
-        if (self.position.y <= 0):
+        if (self.position.y > self.surface.get_height()):
+            # self.position.y = self.surface.get_height()
+            # self.velocity.y *= -1
             self.position.y = 0
-            self.velocity.y *= -1
+
+        if (self.position.y < 0):
+            # self.position.y = 0
+            # self.velocity.y *= -1
+            self.position.y = self.surface.get_height()
             
 
 
@@ -77,7 +82,7 @@ class Boid(Entity):
         self.vLimit = vLimit
 
     def movement(self):
-        self.activeEffects = [self.cohesion(1), self.seperation(), self.alignment(), self.randomness()]
+        self.activeEffects = [self.cohesion(0.01), self.seperation(1), self.alignment(0.125), self.randomness(20)]
         
         for effect in self.activeEffects:
             self.velocity += effect
@@ -99,27 +104,39 @@ class Boid(Entity):
         super().live()
 
     def cohesion(self, strength=0):
-        self.centerBoids = pg.Vector2(0,0)
+        centerBoids = pg.Vector2(0,0)
         if (len(self.boidsInRange) != 0):
             for boid in self.boidsInRange:
-                self.centerBoids += boid.position
+                centerBoids += boid.position
 
-            return pg.Vector2((self.centerBoids / len(self.boidsInRange) - self.position)).normalize() * strength
-        else:
-            return pg.Vector2(0,0)
+            centerBoids = pg.Vector2((centerBoids / len(self.boidsInRange) - self.position))
+            return centerBoids.normalize() * strength
 
-    # Remember to normalize output
+        return centerBoids * strength
+
     def seperation(self, strength=0):
-        return pg.Vector2(0,0)
+        avoidanceVector = pg.Vector2(0,0)
+        if (len(self.boidsInRange) != 0):
+            for boid in self.boidsInRange:
+                if (boid.position.distance_to(self.position) < self.radius * 2):
+                    avoidanceVector -= boid.position - self.position
 
+        return avoidanceVector * strength
 
-    # Remember to normalize output
     def alignment(self, strength=0):
-        return pg.Vector2(0,0)
+        directionBoids = pg.Vector2(0,0)
+        if (len(self.boidsInRange) != 0):
+            for boid in self.boidsInRange:
+                directionBoids += boid.velocity
 
-    # Remember to normalize output
+            directionBoids = pg.Vector2((directionBoids / len(self.boidsInRange)))
+            # return directionBoids * strength
+
+        return directionBoids * strength
+
+
     def randomness(self, strength=0):
-        return pg.Vector2(0,0)
+        return pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize() * strength
 
     def demonstrate(self):
         gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))
