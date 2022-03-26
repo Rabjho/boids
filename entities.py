@@ -6,14 +6,13 @@ from auxfunctions import *
 
 class Entity:
     # size is the size from the center to the "tip" of the entity
-    def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1), antiAliasing = False):
+    def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1), antiAliasing = True):
         self.surface = surface
         self.position = position
         self.radius = radius
         self.rotation = rotation
         self.angle = 120
-        self.color = (29,222,85)
-        self.color = "#5a8ff5"
+        self.color = "#00afb9"
         self.velocity = pg.Vector2(0,0)
         self.clock = pg.time.Clock()
 
