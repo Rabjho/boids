@@ -35,7 +35,6 @@ def main():
         for boid in boids:
             boid.live(boids)
         boids[0].demonstrate()
-
         pg.display.flip()
 
 

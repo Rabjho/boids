@@ -1,12 +1,12 @@
 import sys,pygame as pg
 from pygame import gfxdraw
-from random import randrange
+from random import randrange, uniform
 from auxfunctions import *
 
 
 class Entity:
     # size is the size from the center to the "tip" of the entity
-    def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1)):
+    def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1), antiAliasing = False):
         self.surface = surface
         self.position = position
         self.radius = radius
@@ -20,6 +20,9 @@ class Entity:
         self.rWingVector = self.rotation.rotate(self.angle)
         self.lWingVector = self.rotation.rotate(-self.angle)
 
+        self.antiAliasing = antiAliasing 
+
+
     def draw(self):
         self.tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
         self.rWingVector = self.rotation.rotate(self.angle)
@@ -29,9 +32,12 @@ class Entity:
         self.lWingTip = [self.position.x + self.lWingVector.x * self.radius / 2, self.position.y + self.lWingVector.y * self.radius / 2]
         self.points = [self.tip, self.rWingTip, self.position, self.lWingTip]
 
+        if (self.antiAliasing):
+            gfxdraw.aapolygon(self.surface, self.points, pg.Color(self.color))
 
         gfxdraw.filled_polygon(self.surface, self.points, pg.Color(self.color))
-        gfxdraw.aapolygon(self.surface, self.points, pg.Color(self.color))
+
+
 
     def movement(self):
 
@@ -67,11 +73,12 @@ class Boid(Entity):
     def __init__(self, surface, radius, searchRadius = 50, vLimit = 100):
         super().__init__(surface, pg.Vector2(0,0), radius)
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
+        self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
         self.searchRadius = searchRadius
         self.vLimit = vLimit
 
     def movement(self):
-        self.activeEffects = [self.cohesion()*2, self.seperation(), self.alignment(), self.randomness()]
+        self.activeEffects = [self.cohesion(1), self.seperation(), self.alignment(), self.randomness()]
         
         for effect in self.activeEffects:
             self.velocity += effect
@@ -89,10 +96,7 @@ class Boid(Entity):
     def live(self, boids):
         self.boids = boids
 
-        # TODO Change searchArea to a more pie-esque shape by adding another boolean:
-        # Checking the if the polar coordinates of the vector between self and boid has an angle that is within the angles of the r/l wing vectors
-        self.boidsInRange = [boid for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.rWingVector.as_polar()[1], self.lWingVector.as_polar()[1]) == False and inCircle(boid.position,self.position, self.searchRadius) and boid.position != self.position]
-
+        self.boidsInRange = [boid for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
         super().live()
 
     def cohesion(self, strength=0):
@@ -101,8 +105,7 @@ class Boid(Entity):
             for boid in self.boidsInRange:
                 self.centerBoids += boid.position
 
-            return pg.Vector2((self.centerBoids / len(self.boidsInRange) - self.position)).normalize()        
-
+            return pg.Vector2((self.centerBoids / len(self.boidsInRange) - self.position)).normalize() * strength
         else:
             return pg.Vector2(0,0)
 
@@ -119,7 +122,5 @@ class Boid(Entity):
     def randomness(self, strength=0):
         return pg.Vector2(0,0)
 
-    # TODO Create better representing searchArea demo. Maybe look at these: 
-    # pg.gfxdraw.pie
     def demonstrate(self):
-        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,150))
+        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))
