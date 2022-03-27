@@ -21,3 +21,13 @@ def inPie(point, pieCenter, r, angleStart, angleEnd):
 
 def pointsInArc():
     pass
+
+
+class State:
+    def __init__(self, modes):
+        self.modes = modes
+        self.current = 0
+    
+    def next(self):
+        self.current += 1
+        self.current %= self.modes
