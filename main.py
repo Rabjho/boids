@@ -40,15 +40,15 @@ def main():
                 if (event.key == pg.K_m):
                     if (mode.current == 0):                        
                         for boid in boids:
-                            boid.noClip = False
+                            boid.walls = False
 
                     elif (mode.current == 1):
                         for boid in boids:
-                            boid.noClip = bool(random.getrandbits(1))
+                            boid.walls = bool(random.getrandbits(1))
 
                     elif (mode.current == 2):
                         for boid in boids:
-                            boid.noClip = True
+                            boid.walls = True
                     mode.next()
 
                         

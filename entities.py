@@ -5,22 +5,25 @@ from auxfunctions import *
 
 
 class Entity:
-    # size is the size from the center to the "tip" of the entity
     def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1), antiAliasing = True):
         self.surface = surface
         self.position = position
         self.radius = radius
         self.rotation = rotation
-        self.angle = 120
-        self.color = "#00afb9"
+        self.angle = 120 # Add to arguments that can be controlled w/ default
+        self.color = "#00afb9" # Add to arguments that can be controlled w/ default
+        self.wallMargin = 125 # Add to arguments that can be controlled w/ default
+        self.antiAliasing = antiAliasing
+        self.walls = True # Add to arguments that can be controlled w/ default
+
+
+
         self.velocity = pg.Vector2(0,0)
         self.clock = pg.time.Clock()
 
         self.rWingVector = self.rotation.rotate(self.angle)
         self.lWingVector = self.rotation.rotate(-self.angle)
 
-        self.antiAliasing = antiAliasing
-        self.noClip = True
 
 
     def draw(self):
@@ -41,36 +44,7 @@ class Entity:
 
     def movement(self):
 
-        self.position = self.position + self.velocity * self.deltaTime
-
-        if (self.position.x > self.surface.get_width()):
-            if (self.noClip):
-                self.position.x = 0
-            else:
-                self.position.x = self.surface.get_width()
-                self.velocity.x *= -1
-
-        if (self.position.x < 0):
-            if (self.noClip):
-                self.position.x = self.surface.get_width()
-            else:
-                self.position.x = 0
-                self.velocity.x *= -1
-
-        if (self.position.y > self.surface.get_height()):
-            if (self.noClip):
-                self.position.y = 0
-            else:
-                self.position.y = self.surface.get_height()
-                self.velocity.y *= -1
-
-        if (self.position.y < 0):
-            if (self.noClip):
-                self.position.y = self.surface.get_height()
-            else:
-                self.position.y = 0
-                self.velocity.y *= -1
-            
+        self.position = self.position + self.velocity * self.deltaTime    
 
 
     def live(self):
@@ -91,7 +65,7 @@ class Boid(Entity):
         self.vLimit = vLimit
 
     def movement(self):
-        self.activeEffects = [self.cohesion(0.01), self.seperation(1), self.alignment(0.125), self.randomness(20)]
+        self.activeEffects = [self.cohesion(3), self.seperation(15), self.alignment(7.5), self.randomness(10), self.avoidWalls((5 * self.walls))]
         
         for effect in self.activeEffects:
             self.velocity += effect
@@ -105,6 +79,39 @@ class Boid(Entity):
             self.velocity = self.velocity / self.velocity.length() * self.vLimit
 
         super().movement()
+
+        
+        if (self.position.x > self.surface.get_width()):
+            if (self.walls):
+                self.position.x = self.surface.get_width()
+                self.velocity.x *= -1
+            else:
+                self.position.x = 0
+
+        if (self.position.x < 0):
+            if (self.walls):
+                self.position.x = 0
+                self.velocity.x *= -1
+            else:
+                self.position.x = self.surface.get_width()
+            
+
+        if (self.position.y > self.surface.get_height()):
+            if (self.walls):
+                self.position.y = self.surface.get_height()
+                self.velocity.y *= -1
+            else:
+                self.position.y = 0
+
+        if (self.position.y < 0):
+            if (self.walls):
+                self.position.y = 0
+                self.velocity.y *= -1
+            else:
+                self.position.y = self.surface.get_height()
+
+                
+        
 
     def live(self, boids):
         self.boids = boids
@@ -121,7 +128,7 @@ class Boid(Entity):
             centerBoids = pg.Vector2((centerBoids / len(self.boidsInRange) - self.position))
             return centerBoids.normalize() * strength
 
-        return centerBoids * strength
+        return centerBoids
 
     def seperation(self, strength=0):
         avoidanceVector = pg.Vector2(0,0)
@@ -129,8 +136,10 @@ class Boid(Entity):
             for boid in self.boidsInRange:
                 if (boid.position.distance_to(self.position) < self.radius * 2):
                     avoidanceVector -= boid.position - self.position
+            if (avoidanceVector.length() != 0):
+                return avoidanceVector.normalize() * strength
 
-        return avoidanceVector * strength
+        return avoidanceVector
 
     def alignment(self, strength=0):
         directionBoids = pg.Vector2(0,0)
@@ -139,13 +148,34 @@ class Boid(Entity):
                 directionBoids += boid.velocity
 
             directionBoids = pg.Vector2((directionBoids / len(self.boidsInRange)))
-            # return directionBoids * strength
+            if (directionBoids.length() != 0):
+                return directionBoids.normalize() * strength
 
-        return directionBoids * strength
+        return directionBoids
 
 
     def randomness(self, strength=0):
         return pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize() * strength
+
+    def avoidWalls(self, strength=0):
+        xBoundries = (self.wallMargin, self.surface.get_width() - self.wallMargin)
+        yBoundries = (self.wallMargin, self.surface.get_height() - self.wallMargin)
+        avoidanceVector = pg.Vector2(0,0)
+
+        if (self.position.x < xBoundries[0]):
+            avoidanceVector.x = 1
+        elif (self.position.x > xBoundries[1]):
+            avoidanceVector.x = -1
+        
+        if (self.position.y < yBoundries[0]):
+            avoidanceVector.y = 1
+        elif (self.position.y > yBoundries[1]):
+            avoidanceVector.y = -1
+        
+        if (avoidanceVector.length() != 0):
+            return avoidanceVector.normalize() * strength
+
+        return avoidanceVector
 
     def demonstrate(self):
         gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))
