@@ -65,7 +65,7 @@ class Boid(Entity):
         self.vLimit = vLimit
 
     def movement(self):
-        self.activeEffects = [self.cohesion(3), self.seperation(15), self.alignment(7.5), self.randomness(10), self.avoidWalls((5 * self.walls))]
+        self.activeEffects = [self.cohesion(3), self.seperation(15), self.alignment(7.5), self.randomness(10), self.avoidWalls(5 * self.walls)]
         
         for effect in self.activeEffects:
             self.velocity += effect
@@ -178,4 +178,4 @@ class Boid(Entity):
         return avoidanceVector
 
     def demonstrate(self):
-        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))
+        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))        

@@ -1,7 +1,7 @@
 import pygame as pg
+from pygame import gfxdraw
+import math
 
-
-# TODO rewrite using length of vector in polar coordinates
 def inCircle(point, circlePos, r):
     return (circlePos.x - point.x) * (circlePos.x - point.x) + (circlePos.y - point.y) * (circlePos.y - point.y) <= r*r
 
@@ -18,9 +18,22 @@ def inPie(point, pieCenter, r, angleStart, angleEnd):
         else:
             return (vector[1]+180 >= angleStart+180 and vector[1]+180 <= angleEnd+180)
 
-
-def pointsInArc():
+# TODO Rewrite this from the bottom up
+def drawPie(surface, pieCenter, r, angleStart, angleEnd):
     pass
+    # points = [(pieCenter.x, pieCenter.y)]
+    # for n in range(int(angleStart)+180, int(angleEnd)+180):
+    #     x = pieCenter.x + (r * math.cos(n * math.pi / 180))
+    #     y = pieCenter.y + (r * math.sin(n * math.pi / 180))
+
+    #     points.append((x,y))
+    #     print(str(n * math.pi / 180))
+    # points.append((pieCenter.x, pieCenter.y))
+    # if (len(points) > 2):
+    #     gfxdraw.filled_polygon(surface, points, pg.Color(150,150,150,80))
+    # else:
+    #     print("now")
+    # return points
 
 
 class State:
