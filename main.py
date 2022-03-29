@@ -26,12 +26,22 @@ def main(size=(1280, 720), fullscreen=False):
     clock = pg.time.Clock()
 
 
-    palette = ["#00AFB9", "#d83a74", "#6EB257", "#F3F719", "#FFFFFF", "#FE7F2D", "#b941c6", "#1978e5", "#41c676"]
+    palette = ["#00AFB9", "#f26076", "#6EB257", "#F3F719", "#FFFFFF", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
+
+
+    # TODO Fit the OG logo colour palette into the palette above
+    rabjhoPalette = ["#252530", "#ff2625", "#31b5d1", "#a9a9a9"]
+
+    closest = [0, float('inf')]
     boids = []
 
     for i in range(100):
         boids.append(Boid(screen, 10, 50, 200))
-    closest = [0, float('inf')]
+
+    predators = []
+    for i in range(10):
+        predators.append(Predator(screen, 12, boids, 150))
+
 
 
     while True:
@@ -57,14 +67,21 @@ def main(size=(1280, 720), fullscreen=False):
                     if (mode.current == 0):                        
                         for boid in boids:
                             boid.walls = False
+                        for predator in predators:
+                            predator.walls = False
 
                     elif (mode.current == 1):
                         for boid in boids:
                             boid.walls = bool(random.getrandbits(1))
+                        for predator in predators:
+                            predator.walls = bool(random.getrandbits(1))
 
                     elif (mode.current == 2):
                         for boid in boids:
                             boid.walls = True
+                        for predator in predators:
+                            predator.walls = True
+
                     mode.next()
 
                 if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
@@ -90,7 +107,10 @@ def main(size=(1280, 720), fullscreen=False):
         screen.fill(backgroundColour)
 
         for boid in boids:
-            boid.live(boids)
+            boid.live(boids, predators)
+
+        for predator in predators:
+            predator.live()
 
         pg.display.flip()
 

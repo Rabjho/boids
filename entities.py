@@ -1,14 +1,15 @@
 from ctypes import alignment
 import sys,pygame as pg
 from pygame import gfxdraw
-from random import randrange, uniform, getrandbits
+from random import randrange, uniform, choice
 from auxFunctions import *
 
 
 class Entity:
-    def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1), antiAliasing = True):
+    def __init__(self, surface, position, radius, vLimit, rotation=pg.Vector2(0,1), antiAliasing = True):
         self.surface = surface
         self.position = position
+        self.vLimit = vLimit
         self.radius = radius
         self.rotation = rotation
         self.angle = 120 # Add to arguments that can be controlled w/ default
@@ -26,6 +27,12 @@ class Entity:
         self.lWingVector = self.rotation.rotate(-self.angle)
 
 
+        self.trailing = False
+        self.trailColor = pg.Color(150,150,150, 150)
+        self.trailPoints = [(self.position, pg.time.get_ticks())]
+        self.trailLength = 0.3
+
+
 
     def draw(self):
         self.rWingVector = self.rotation.rotate(self.angle)
@@ -38,21 +45,26 @@ class Entity:
 
         if (self.antiAliasing):
             gfxdraw.aapolygon(self.surface, self.points, pg.Color(self.color))
-
         gfxdraw.filled_polygon(self.surface, self.points, pg.Color(self.color))
 
 
+        if (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
+            self.trailPoints.pop(0)
+        
+        self.trailPoints.append((self.position, pg.time.get_ticks()))
 
     def movement(self):
         self.position = self.position + self.velocity * self.deltaTime   
+
+        if self.velocity.length() >= self.vLimit:
+            self.velocity = self.velocity.normalize() * self.vLimit
+
 
         try:
             self.rotation = self.velocity.normalize()
         except:
             pass            
  
-
-
     def live(self):
         self.clock.tick()
 
@@ -60,118 +72,7 @@ class Entity:
 
         self.draw()
         self.movement()
-
-
-class Boid(Entity):
-    def __init__(self, surface, radius, searchRadius = 50, vLimit = 100):
-        super().__init__(surface, pg.Vector2(0,0), radius)
-        self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
-        self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
-        self.searchRadius = searchRadius
-        self.vLimit = vLimit
-
-
-
-        self.cohesionStrength = 3
-        self.seprationStrength = 15
-        self.alignmentStrength = 7.5
-
-        self.demonstrating = False
-        self.demonstrateColor = pg.Color(150,150,150,80)
-
-        self.trailing = False
-        self.trailColor = pg.Color(150,150,150, 150)
-        self.trailPoints = [(self.position, pg.time.get_ticks())]
-        self.trailLength = 0.3
-
-
-    def draw(self):
-        self.demonstrate()
-
-        if (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
-            self.trailPoints.pop(0)
-        
-        self.trailPoints.append((self.position, pg.time.get_ticks()))
-
-
-        self.drawTrail()
-        super().draw()
-
-
-    def movement(self):
-
-        self.baseVelocity = pg.Vector2(0,0)
-
-        if (len(self.boidsInRange) != 0):
-            rule1 = pg.Vector2(0,0)
-            rule2 = pg.Vector2(0,0)
-            rule3 = pg.Vector2(0,0)
-
-            for boid in self.boidsInRange:
-                rule1 += boid[0].position * boid[1]
-
-                if (boid[0].position.distance_to(self.position) < self.radius * 2):
-                    rule2 -= boid[0].position - self.position
-
-                rule3 += boid[0].velocity * boid[1]
-
-
-            if (rule1.length() != 0):
-                self.baseVelocity =+ pg.Vector2((rule1 / len(self.boidsInRange) - self.position)).normalize() * self.cohesionStrength
-
-            if (rule2.length() != 0):
-                self.baseVelocity =+ rule2.normalize() * self.seprationStrength
-
-            if (rule3.length() != 0):
-                self.baseVelocity =+ pg.Vector2((rule3 / len(self.boidsInRange))).normalize() * self.alignmentStrength
-
-        
-        self.activeEffects = [self.baseVelocity, self.randomness(10), self.avoidWalls(5 * self.walls)]
-  
-        for effect in self.activeEffects:
-            self.velocity += effect
-
-
-        if self.velocity.length() >= self.vLimit:
-            self.velocity = self.velocity.normalize() * self.vLimit
-
-        super().movement()
-
-        self.bounceOfWalls()
-
-    def live(self, boids):
-        
-        self.boids = boids
-
-        self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
-
-        super().live()
-
-
-    def randomness(self, strength=0):
-        return pg.Vector2(uniform(-1,1), uniform(-1,1)).normalize() * strength
-
-
-    def avoidWalls(self, strength=0):
-        xBoundries = (self.wallMargin, self.surface.get_width() - self.wallMargin)
-        yBoundries = (self.wallMargin, self.surface.get_height() - self.wallMargin)
-        avoidanceVector = pg.Vector2(0,0)
-
-        if (self.position.x < xBoundries[0]):
-            avoidanceVector.x = 1
-        elif (self.position.x > xBoundries[1]):
-            avoidanceVector.x = -1
-        
-        if (self.position.y < yBoundries[0]):
-            avoidanceVector.y = 1
-        elif (self.position.y > yBoundries[1]):
-            avoidanceVector.y = -1
-        
-        if (avoidanceVector.length() != 0):
-            return avoidanceVector.normalize() * strength
-
-        return avoidanceVector
-
+    
     def bounceOfWalls(self):
         if (self.position.x > self.surface.get_width()):
             if (self.walls):
@@ -202,16 +103,126 @@ class Boid(Entity):
             else:
                 self.position.y = self.surface.get_height()
 
-    def demonstrate(self):
-        if (self.demonstrating):
-            gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateColor)
+    def randomness(self, strength=0):
+        return pg.Vector2(uniform(-1,1), uniform(-1,1)).normalize() * strength
 
     def drawTrail(self):
         if (self.trailing or self.demonstrating):
             try:
-                gfxdraw.aapolygon(self.surface, (list(zip(*self.trailPoints))[0][::1]+list(zip(*self.trailPoints))[0][::-1])[::10], self.trailColor)
+                gfxdraw.aapolygon(self.surface, (list(zip(*self.trailPoints))[0][::1]+list(zip(*self.trailPoints))[0][::-1])[::5], self.trailColor)
             except:
                 pass
+
+    def avoidWalls(self, strength=0):
+        xBoundries = (self.wallMargin, self.surface.get_width() - self.wallMargin)
+        yBoundries = (self.wallMargin, self.surface.get_height() - self.wallMargin)
+        avoidanceVector = pg.Vector2(0,0)
+
+        if (self.position.x < xBoundries[0]):
+            avoidanceVector.x = 1
+        elif (self.position.x > xBoundries[1]):
+            avoidanceVector.x = -1
+        
+        if (self.position.y < yBoundries[0]):
+            avoidanceVector.y = 1
+        elif (self.position.y > yBoundries[1]):
+            avoidanceVector.y = -1
+        
+        if (avoidanceVector.length() != 0):
+            return avoidanceVector.normalize() * strength
+
+        return avoidanceVector
+
+class Boid(Entity):
+    def __init__(self, surface, radius, searchRadius, vLimit):
+        super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
+        self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
+        self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
+        self.searchRadius = searchRadius
+
+        self.cohesionStrength = 3
+        self.seprationStrength = 15
+        self.alignmentStrength = 7.5
+        self.predatorAvoidStrength = 20
+        self.predatorAwarenessFactor = 2
+
+        self.demonstrating = False
+        self.demonstrateBoidColor = pg.Color(150,160,160,80)
+        self.demonstratePredatorColor = pg.Color(255,120,120,20)
+
+
+    def draw(self):
+        self.demonstrate()
+
+        self.drawTrail()
+        super().draw()
+
+
+    def movement(self):
+
+        self.baseVelocity = pg.Vector2(0,0)
+
+        if (len(self.boidsInRange) != 0):
+            rule1 = pg.Vector2(0,0)
+            rule2 = pg.Vector2(0,0)
+            rule3 = pg.Vector2(0,0)
+
+            for boid in self.boidsInRange:
+                rule1 += boid[0].position * boid[1]
+
+                if (boid[0].position.distance_to(self.position) < self.radius * 2):
+                    rule2 -= boid[0].position - self.position
+
+                rule3 += boid[0].velocity * boid[1]
+
+
+            if (rule1.length() != 0):
+                self.baseVelocity += pg.Vector2((rule1 / len(self.boidsInRange) - self.position)).normalize() * self.cohesionStrength
+
+            if (rule2.length() != 0):
+                self.baseVelocity += rule2.normalize() * self.seprationStrength
+
+            if (rule3.length() != 0):
+                self.baseVelocity += pg.Vector2((rule3 / len(self.boidsInRange))).normalize() * self.alignmentStrength
+
+
+        if (len(self.predatorsInRange) != 0):
+            predatorAvoidance = pg.Vector2(0,0)
+            for predator in self.predatorsInRange:
+                predatorAvoidance += predator.position
+
+            if (predatorAvoidance.length() != 0):
+                self.baseVelocity -= pg.Vector2((predatorAvoidance / len(self.predatorsInRange) - self.position)).normalize() * self.predatorAvoidStrength
+
+
+        
+        self.activeEffects = [self.baseVelocity, self.randomness(10), self.avoidWalls(5 * self.walls)]
+  
+        for effect in self.activeEffects:
+            self.velocity += effect
+
+
+
+        super().movement()
+
+        self.bounceOfWalls()
+
+    def live(self, boids, predators):
+        
+        self.boids = boids
+        self.enemies = predators
+
+        self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boids if inPie(boid.position, self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
+        self.predatorsInRange = [predator for predator in self.enemies if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1])]
+
+        super().live()
+
+
+    def demonstrate(self):
+        if (self.demonstrating):
+            gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self.lWingVector, self.rWingVector), self.demonstratePredatorColor)
+            gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateBoidColor)
+
 
 
 # Former functions for the three base rules of the boids algorithm. 
@@ -250,3 +261,34 @@ class Boid(Entity):
     #             return directionBoids.normalize() * strength
 
     #     return directionBoids
+
+class Predator(Entity):
+    def __init__(self, surface, radius, boids, vLimit):
+        super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
+
+        self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
+        self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
+        self.vLimit = vLimit
+        self.color = "#000000"
+        self.trackingStrength = 10
+
+        self.boids = boids
+        self.target = choice(self.boids) 
+        self.timeToNewTarget = uniform(3, 8)
+        self.cooldownTargetChange = pg.time.get_ticks()
+
+    def movement(self):
+        self.baseTracking = (pg.Vector2(self.target.position)-pg.Vector2(self.position)).normalize() * self.trackingStrength
+        
+        self.activeEffects = [self.baseTracking, self.avoidWalls(5 * self.walls)]
+
+        for effect in self.activeEffects:
+            self.velocity += effect
+
+        if (pg.time.get_ticks() - self.cooldownTargetChange > self.timeToNewTarget * 1000 or pg.Vector2(self.position).distance_to(pg.Vector2(self.target.position)) < 5):
+            self.target = choice(self.boids)
+            self.cooldownTargetChange = pg.time.get_ticks()
+
+        super().movement()
+        
+        self.bounceOfWalls()
