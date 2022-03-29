@@ -1,4 +1,5 @@
 import sys,pygame as pg
+from matplotlib.pyplot import close
 from entities import *
 import random
 from auxfunctions import State
@@ -26,8 +27,10 @@ def main():
 
     palette = ["#00AFB9", "#d83a74", "#6EB257", "#F3F719", "#FFFFFF", "#FE7F2D", "#b941c6", "#1978e5", "#41c676"]
     boids = []
+
     for i in range(100):
         boids.append(Boid(screen, 10, 50, 200))
+    closest = [0, float('inf')]
 
 
     while True:
@@ -40,6 +43,14 @@ def main():
                     main()
                 
                 if (event.key == pg.K_d):
+                    if (not demonstrate):
+                        closest[1] = pg.Vector2(boids[closest[0]].position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))
+                        for boid in boids:
+                            if (pg.Vector2(boid.position).distance_squared_to(pg.Vector2(pg.mouse.get_pos())) < closest[1]):
+                                closest = [boids.index(boid), pg.Vector2(boid.position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))]
+                        boids[closest[0]].demonstrating = True
+                    else:
+                        boids[closest[0]].demonstrating = False
                     demonstrate = not demonstrate
 
                 if (event.key == pg.K_m):
@@ -75,8 +86,7 @@ def main():
 
         for boid in boids:
             boid.live(boids)
-        if (demonstrate):
-            boids[0].demonstrate()
+
         pg.display.flip()
 
 

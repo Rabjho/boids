@@ -63,6 +63,12 @@ class Boid(Entity):
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
         self.searchRadius = searchRadius
         self.vLimit = vLimit
+        self.demonstrating = False
+
+    def draw(self):
+        self.demonstrate()
+        super().draw()
+
 
     def movement(self):
         self.activeEffects = [self.cohesion(3), self.seperation(15), self.alignment(7.5), self.randomness(10), self.avoidWalls(5 * self.walls)]
@@ -147,7 +153,8 @@ class Boid(Entity):
         return avoidanceVector
 
     def demonstrate(self):
-        gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), pg.Color(150,150,150,80))
+        if (self.demonstrating):
+            gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), pg.Color(150,150,150,80))
 
     def bounceOfWalls(self):
         if (self.position.x > self.surface.get_width()):
