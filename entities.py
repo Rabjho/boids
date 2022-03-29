@@ -79,10 +79,22 @@ class Boid(Entity):
         self.demonstrating = False
         self.demonstrateColor = pg.Color(150,150,150,80)
 
+        self.trailing = False
+        self.trailColor = pg.Color(150,150,150, 150)
+        self.trailPoints = [(self.position, pg.time.get_ticks())]
+        self.trailLength = 0.3
 
 
     def draw(self):
         self.demonstrate()
+
+        if (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
+            self.trailPoints.pop(0)
+        
+        self.trailPoints.append((self.position, pg.time.get_ticks()))
+
+
+        self.drawTrail()
         super().draw()
 
 
@@ -194,8 +206,12 @@ class Boid(Entity):
         if (self.demonstrating):
             gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateColor)
 
-
-
+    def drawTrail(self):
+        if (self.trailing or self.demonstrating):
+            try:
+                gfxdraw.aapolygon(self.surface, (list(zip(*self.trailPoints))[0][::1]+list(zip(*self.trailPoints))[0][::-1])[::10], self.trailColor)
+            except:
+                pass
 
 
 # Former functions for the three base rules of the boids algorithm. 

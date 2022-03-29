@@ -77,6 +77,11 @@ def main(size=(1280, 720), fullscreen=False):
                 if (event.key > pg.K_0 and event.key <= pg.K_9):
                     for boid in boids:
                         boid.color = pg.Color(random.choice(palette[:event.key-48]))
+
+                if (event.key == pg.K_t):
+                    for boid in boids:
+                        if (not boid.demonstrating):
+                            boid.trailing = not boid.trailing
                     
 
                         
