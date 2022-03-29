@@ -1,3 +1,4 @@
+from ctypes import alignment
 import sys,pygame as pg
 from pygame import gfxdraw
 from random import randrange, uniform, getrandbits
@@ -43,8 +44,13 @@ class Entity:
 
 
     def movement(self):
+        self.position = self.position + self.velocity * self.deltaTime   
 
-        self.position = self.position + self.velocity * self.deltaTime    
+        try:
+            self.rotation = self.velocity.normalize()
+        except:
+            pass            
+ 
 
 
     def live(self):
@@ -63,7 +69,17 @@ class Boid(Entity):
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
         self.searchRadius = searchRadius
         self.vLimit = vLimit
+
+
+
+        self.cohesionStrength = 3
+        self.seprationStrength = 15
+        self.alignmentStrength = 7.5
+
         self.demonstrating = False
+        self.demonstrateColor = pg.Color(150,150,150,80)
+
+
 
     def draw(self):
         self.demonstrate()
@@ -71,66 +87,58 @@ class Boid(Entity):
 
 
     def movement(self):
-        self.activeEffects = [self.cohesion(3), self.seperation(15), self.alignment(7.5), self.randomness(10), self.avoidWalls(5 * self.walls)]
+
+        self.baseVelocity = pg.Vector2(0,0)
+
+        if (len(self.boidsInRange) != 0):
+            rule1 = pg.Vector2(0,0)
+            rule2 = pg.Vector2(0,0)
+            rule3 = pg.Vector2(0,0)
+
+            for boid in self.boidsInRange:
+                rule1 += boid[0].position * boid[1]
+
+                if (boid[0].position.distance_to(self.position) < self.radius * 2):
+                    rule2 -= boid[0].position - self.position
+
+                rule3 += boid[0].velocity * boid[1]
+
+
+            if (rule1.length() != 0):
+                self.baseVelocity =+ pg.Vector2((rule1 / len(self.boidsInRange) - self.position)).normalize() * self.cohesionStrength
+
+            if (rule2.length() != 0):
+                self.baseVelocity =+ rule2.normalize() * self.seprationStrength
+
+            if (rule3.length() != 0):
+                self.baseVelocity =+ pg.Vector2((rule3 / len(self.boidsInRange))).normalize() * self.alignmentStrength
+
         
+        self.activeEffects = [self.baseVelocity, self.randomness(10), self.avoidWalls(5 * self.walls)]
+  
         for effect in self.activeEffects:
             self.velocity += effect
 
-        try:
-            self.rotation = self.velocity.normalize()
-        except:
-            pass            
 
         if self.velocity.length() >= self.vLimit:
-            self.velocity = self.velocity / self.velocity.length() * self.vLimit
+            self.velocity = self.velocity.normalize() * self.vLimit
 
         super().movement()
 
         self.bounceOfWalls()
 
     def live(self, boids):
+        
         self.boids = boids
 
         self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
+
         super().live()
-
-    def cohesion(self, strength=0):
-        centerBoids = pg.Vector2(0,0)
-        if (len(self.boidsInRange) != 0):
-            for boid in self.boidsInRange:
-                centerBoids += boid[0].position * boid[1]
-
-            centerBoids = pg.Vector2((centerBoids / len(self.boidsInRange) - self.position))
-            return centerBoids.normalize() * strength
-
-        return centerBoids
-
-    def seperation(self, strength=0):
-        avoidanceVector = pg.Vector2(0,0)
-        if (len(self.boidsInRange) != 0):
-            for boid in self.boidsInRange:
-                if (boid[0].position.distance_to(self.position) < self.radius * 2):
-                    avoidanceVector -= boid[0].position - self.position
-            if (avoidanceVector.length() != 0):
-                return avoidanceVector.normalize() * strength
-
-        return avoidanceVector
-
-    def alignment(self, strength=0):
-        directionBoids = pg.Vector2(0,0)
-        if (len(self.boidsInRange) != 0):
-            for boid in self.boidsInRange:
-                directionBoids += boid[0].velocity * boid[1]
-
-            directionBoids = pg.Vector2((directionBoids / len(self.boidsInRange)))
-            if (directionBoids.length() != 0):
-                return directionBoids.normalize() * strength
-
-        return directionBoids
 
 
     def randomness(self, strength=0):
         return pg.Vector2(uniform(-1,1), uniform(-1,1)).normalize() * strength
+
 
     def avoidWalls(self, strength=0):
         xBoundries = (self.wallMargin, self.surface.get_width() - self.wallMargin)
@@ -151,10 +159,6 @@ class Boid(Entity):
             return avoidanceVector.normalize() * strength
 
         return avoidanceVector
-
-    def demonstrate(self):
-        if (self.demonstrating):
-            gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), pg.Color(150,150,150,80))
 
     def bounceOfWalls(self):
         if (self.position.x > self.surface.get_width()):
@@ -185,3 +189,48 @@ class Boid(Entity):
                 self.velocity.y *= -1
             else:
                 self.position.y = self.surface.get_height()
+
+    def demonstrate(self):
+        if (self.demonstrating):
+            gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateColor)
+
+
+
+
+
+# Former functions for the three base rules of the boids algorithm. 
+# They have been merged to avoid iterating through boidsInRange thrice.
+
+    # def cohesion(self, strength=0):
+    #     centerBoids = pg.Vector2(0,0)
+    #     if (len(self.boidsInRange) != 0):
+    #         for boid in self.boidsInRange:
+    #             centerBoids += boid[0].position * boid[1]
+
+    #         centerBoids = pg.Vector2((centerBoids / len(self.boidsInRange) - self.position))
+    #         return centerBoids.normalize() * strength
+
+    #     return centerBoids
+
+    # def seperation(self, strength=0):
+    #     avoidanceVector = pg.Vector2(0,0)
+    #     if (len(self.boidsInRange) != 0):
+    #         for boid in self.boidsInRange:
+    #             if (boid[0].position.distance_to(self.position) < self.radius * 2):
+    #                 avoidanceVector -= boid[0].position - self.position
+    #         if (avoidanceVector.length() != 0):
+    #             return avoidanceVector.normalize() * strength
+
+    #     return avoidanceVector
+
+    # def alignment(self, strength=0):
+    #     directionBoids = pg.Vector2(0,0)
+    #     if (len(self.boidsInRange) != 0):
+    #         for boid in self.boidsInRange:
+    #             directionBoids += boid[0].velocity * boid[1]
+
+    #         directionBoids = pg.Vector2((directionBoids / len(self.boidsInRange)))
+    #         if (directionBoids.length() != 0):
+    #             return directionBoids.normalize() * strength
+
+    #     return directionBoids

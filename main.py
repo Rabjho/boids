@@ -4,18 +4,21 @@ from entities import *
 import random
 from auxFunctions import State
 
-
-
-def main():
-    print("main")
+def main(size=(1280, 720), fullscreen=False):
+    print("started simulation")
     pg.init()
 
-    size = [1280, 720]
-    screen = pg.display.set_mode(size, pg.RESIZABLE)
+    # size = lastState[0]
+    # fullscreen = lastState[1]
     backgroundColour = "#3E4D66"
     demonstrate = False
     mode = State(3)
-    fullscreen = False
+
+    if (fullscreen):
+        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
+    else:
+        screen = pg.display.set_mode(size, pg.RESIZABLE)
+        
 
     pg.display.set_caption('Boids')
     Icon = pg.image.load('Assets/Logo.png')
@@ -36,9 +39,8 @@ def main():
             if (event.type == pg.QUIT):
                 sys.exit()
             if (event.type == pg.KEYDOWN):
-
                 if (event.key == pg.K_r):
-                    main()
+                    main(screen.get_size(), fullscreen)
                 
                 if (event.key == pg.K_d):
                     if (not demonstrate):
