@@ -2,9 +2,7 @@ import sys,pygame as pg
 from matplotlib.pyplot import close
 from entities import *
 import random
-from auxfunctions import State
-
-
+from auxFunctions import State
 
 
 

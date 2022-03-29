@@ -1,7 +1,7 @@
 import sys,pygame as pg
 from pygame import gfxdraw
 from random import randrange, uniform, getrandbits
-from auxfunctions import *
+from auxFunctions import *
 
 
 class Entity:

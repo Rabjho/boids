@@ -1,6 +1,5 @@
 import pygame as pg
 
-
 def inCircle(point, circlePos, r):
     return (circlePos.x - point.x) * (circlePos.x - point.x) + (circlePos.y - point.y) * (circlePos.y - point.y) <= r*r
 
