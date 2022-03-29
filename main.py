@@ -9,7 +9,7 @@ def main():
     print("main")
     pg.init()
 
-    size = [1000,500]
+    size = [1280, 720]
     screen = pg.display.set_mode(size, pg.RESIZABLE)
     backgroundColour = "#3E4D66"
     demonstrate = False

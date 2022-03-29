@@ -155,7 +155,7 @@ class Boid(Entity):
 
 
     def randomness(self, strength=0):
-        return pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize() * strength
+        return pg.Vector2(uniform(-1,1), uniform(-1,1)).normalize() * strength
 
     def avoidWalls(self, strength=0):
         xBoundries = (self.wallMargin, self.surface.get_width() - self.wallMargin)
@@ -178,7 +178,4 @@ class Boid(Entity):
         return avoidanceVector
 
     def demonstrate(self):
-        # gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))        
-        # drawPie(self.surface, pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector)
         gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), pg.Color(150,150,150,80))
-
