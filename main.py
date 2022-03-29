@@ -1,9 +1,10 @@
 import sys,pygame as pg
-from numpy import full
-from matplotlib.pyplot import draw
 from entities import *
 import random
 from auxfunctions import State
+
+
+
 
 
 def main():
@@ -22,6 +23,8 @@ def main():
     pg.display.set_icon(Icon)
     clock = pg.time.Clock()
 
+
+    palette = ["#00AFB9", "#d83a74", "#6EB257", "#F3F719", "#FFFFFF", "#FE7F2D", "#b941c6", "#1978e5", "#41c676"]
     boids = []
     for i in range(100):
         boids.append(Boid(screen, 10, 50, 200))
@@ -52,12 +55,18 @@ def main():
                         for boid in boids:
                             boid.walls = True
                     mode.next()
-                if (event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT):
+
+                if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
                     fullscreen = not fullscreen
                     if (fullscreen):
                         screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
                     else:
                         screen = pg.display.set_mode(size, pg.RESIZABLE)
+
+                if (event.key > pg.K_0 and event.key <= pg.K_9):
+                    for boid in boids:
+                        boid.color = pg.Color(random.choice(palette[:event.key-48]))
+                    
 
                         
         clock.tick(60)

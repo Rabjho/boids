@@ -82,20 +82,17 @@ class Boid(Entity):
 
         self.bounceOfWalls()
 
-                
-        
-
     def live(self, boids):
         self.boids = boids
 
-        self.boidsInRange = [boid for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
+        self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boids if inPie(boid.position,self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
         super().live()
 
     def cohesion(self, strength=0):
         centerBoids = pg.Vector2(0,0)
         if (len(self.boidsInRange) != 0):
             for boid in self.boidsInRange:
-                centerBoids += boid.position
+                centerBoids += boid[0].position * boid[1]
 
             centerBoids = pg.Vector2((centerBoids / len(self.boidsInRange) - self.position))
             return centerBoids.normalize() * strength
@@ -106,8 +103,8 @@ class Boid(Entity):
         avoidanceVector = pg.Vector2(0,0)
         if (len(self.boidsInRange) != 0):
             for boid in self.boidsInRange:
-                if (boid.position.distance_to(self.position) < self.radius * 2):
-                    avoidanceVector -= boid.position - self.position
+                if (boid[0].position.distance_to(self.position) < self.radius * 2):
+                    avoidanceVector -= boid[0].position - self.position
             if (avoidanceVector.length() != 0):
                 return avoidanceVector.normalize() * strength
 
@@ -117,7 +114,7 @@ class Boid(Entity):
         directionBoids = pg.Vector2(0,0)
         if (len(self.boidsInRange) != 0):
             for boid in self.boidsInRange:
-                directionBoids += boid.velocity
+                directionBoids += boid[0].velocity * boid[1]
 
             directionBoids = pg.Vector2((directionBoids / len(self.boidsInRange)))
             if (directionBoids.length() != 0):
