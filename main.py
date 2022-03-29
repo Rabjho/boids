@@ -1,4 +1,5 @@
 import sys,pygame as pg
+from numpy import full
 from matplotlib.pyplot import draw
 from entities import *
 import random
@@ -14,6 +15,7 @@ def main():
     backgroundColour = "#3E4D66"
     demonstrate = False
     mode = State(3)
+    fullscreen = False
 
     pg.display.set_caption('Boids')
     Icon = pg.image.load('Assets/Logo.png')
@@ -50,6 +52,12 @@ def main():
                         for boid in boids:
                             boid.walls = True
                     mode.next()
+                if (event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT):
+                    fullscreen = not fullscreen
+                    if (fullscreen):
+                        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
+                    else:
+                        screen = pg.display.set_mode(size, pg.RESIZABLE)
 
                         
         clock.tick(60)

@@ -1,7 +1,5 @@
-from tracemalloc import start
 import pygame as pg
-from pygame import gfxdraw
-import math
+
 
 def inCircle(point, circlePos, r):
     return (circlePos.x - point.x) * (circlePos.x - point.x) + (circlePos.y - point.y) * (circlePos.y - point.y) <= r*r

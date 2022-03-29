@@ -80,35 +80,7 @@ class Boid(Entity):
 
         super().movement()
 
-        
-        if (self.position.x > self.surface.get_width()):
-            if (self.walls):
-                self.position.x = self.surface.get_width()
-                self.velocity.x *= -1
-            else:
-                self.position.x = 0
-
-        if (self.position.x < 0):
-            if (self.walls):
-                self.position.x = 0
-                self.velocity.x *= -1
-            else:
-                self.position.x = self.surface.get_width()
-            
-
-        if (self.position.y > self.surface.get_height()):
-            if (self.walls):
-                self.position.y = self.surface.get_height()
-                self.velocity.y *= -1
-            else:
-                self.position.y = 0
-
-        if (self.position.y < 0):
-            if (self.walls):
-                self.position.y = 0
-                self.velocity.y *= -1
-            else:
-                self.position.y = self.surface.get_height()
+        self.bounceOfWalls()
 
                 
         
@@ -179,3 +151,33 @@ class Boid(Entity):
 
     def demonstrate(self):
         gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), pg.Color(150,150,150,80))
+
+    def bounceOfWalls(self):
+        if (self.position.x > self.surface.get_width()):
+            if (self.walls):
+                self.position.x = self.surface.get_width()
+                self.velocity.x *= -1
+            else:
+                self.position.x = 0
+
+        if (self.position.x < 0):
+            if (self.walls):
+                self.position.x = 0
+                self.velocity.x *= -1
+            else:
+                self.position.x = self.surface.get_width()
+            
+
+        if (self.position.y > self.surface.get_height()):
+            if (self.walls):
+                self.position.y = self.surface.get_height()
+                self.velocity.y *= -1
+            else:
+                self.position.y = 0
+
+        if (self.position.y < 0):
+            if (self.walls):
+                self.position.y = 0
+                self.velocity.y *= -1
+            else:
+                self.position.y = self.surface.get_height()
