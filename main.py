@@ -2,7 +2,6 @@ import sys,pygame as pg
 from matplotlib.pyplot import draw
 from entities import *
 import random
-from pygame import gfxdraw
 from auxfunctions import State
 
 
@@ -11,7 +10,7 @@ def main():
     pg.init()
 
     size = [1000,500]
-    screen = pg.display.set_mode(size)
+    screen = pg.display.set_mode(size, pg.RESIZABLE)
     backgroundColour = "#3E4D66"
     demonstrate = False
     mode = State(3)
@@ -56,8 +55,6 @@ def main():
         clock.tick(60)
 
         screen.fill(backgroundColour)
-
-        # drawPie(screen, pg.Vector2(500,250), 50, 120, 180)
 
         for boid in boids:
             boid.live(boids)

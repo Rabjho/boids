@@ -1,3 +1,4 @@
+from tracemalloc import start
 import pygame as pg
 from pygame import gfxdraw
 import math
@@ -19,21 +20,30 @@ def inPie(point, pieCenter, r, angleStart, angleEnd):
             return (vector[1]+180 >= angleStart+180 and vector[1]+180 <= angleEnd+180)
 
 # TODO Rewrite this from the bottom up
-def drawPie(surface, pieCenter, r, angleStart, angleEnd):
-    pass
-    # points = [(pieCenter.x, pieCenter.y)]
-    # for n in range(int(angleStart)+180, int(angleEnd)+180):
-    #     x = pieCenter.x + (r * math.cos(n * math.pi / 180))
-    #     y = pieCenter.y + (r * math.sin(n * math.pi / 180))
+def drawPie(pieCenter, r, startVector, endVector):
+    # pass
+    points = [pieCenter]
+    # print((startVector.as_polar()[1], endVector.as_polar()[1]))
 
-    #     points.append((x,y))
-    #     print(str(n * math.pi / 180))
-    # points.append((pieCenter.x, pieCenter.y))
-    # if (len(points) > 2):
-    #     gfxdraw.filled_polygon(surface, points, pg.Color(150,150,150,80))
-    # else:
-    #     print("now")
-    # return points
+    y = round(abs(endVector.as_polar()[1] - startVector.as_polar()[1]))
+
+
+    if (startVector.as_polar()[1] < endVector.as_polar()[1]):
+        x = abs(round(startVector.as_polar()[1] - endVector.as_polar()[1]))
+    else:
+        pass
+        x = 360 - abs(round(startVector.as_polar()[1] - endVector.as_polar()[1]))
+
+    for i in range(x, 0, -1):
+        pass
+        points.append(pieCenter + startVector.rotate(i) * r)
+
+    points.append(pieCenter)
+
+    if (len(points) > 2):
+        return points
+    else:  
+        return (pieCenter, startVector, endVector)
 
 
 class State:

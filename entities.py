@@ -27,12 +27,12 @@ class Entity:
 
 
     def draw(self):
-        self.tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
         self.rWingVector = self.rotation.rotate(self.angle)
         self.lWingVector = self.rotation.rotate(-self.angle)
+        self.tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
 
-        self.rWingTip = [self.position.x + self.rWingVector.x * self.radius / 2, self.position.y + self.rWingVector.y * self.radius / 2]
-        self.lWingTip = [self.position.x + self.lWingVector.x * self.radius / 2, self.position.y + self.lWingVector.y * self.radius / 2]
+        self.rWingTip = [self.position.x + self.rWingVector.x * (self.radius / 2), self.position.y + self.rWingVector.y * (self.radius / 2)]
+        self.lWingTip = [self.position.x + self.lWingVector.x * (self.radius / 2), self.position.y + self.lWingVector.y * (self.radius / 2)]
         self.points = [self.tip, self.rWingTip, self.position, self.lWingTip]
 
         if (self.antiAliasing):
@@ -178,4 +178,7 @@ class Boid(Entity):
         return avoidanceVector
 
     def demonstrate(self):
-        gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))        
+        # gfxdraw.filled_circle(self.surface, round(self.position.x), round(self.position.y), self.searchRadius, pg.Color(150,150,150,80))        
+        # drawPie(self.surface, pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector)
+        gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), pg.Color(150,150,150,80))
+
