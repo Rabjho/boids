@@ -19,22 +19,16 @@ def inPie(point, pieCenter, r, angleStart, angleEnd):
         else:
             return (vector[1]+180 >= angleStart+180 and vector[1]+180 <= angleEnd+180)
 
-# TODO Rewrite this from the bottom up
 def drawPie(pieCenter, r, startVector, endVector):
-    # pass
     points = [pieCenter]
-    # print((startVector.as_polar()[1], endVector.as_polar()[1]))
-
-    y = round(abs(endVector.as_polar()[1] - startVector.as_polar()[1]))
-
 
     if (startVector.as_polar()[1] < endVector.as_polar()[1]):
-        x = abs(round(startVector.as_polar()[1] - endVector.as_polar()[1]))
+        pieAngle = abs(round(startVector.as_polar()[1] - endVector.as_polar()[1]))
     else:
         pass
-        x = 360 - abs(round(startVector.as_polar()[1] - endVector.as_polar()[1]))
+        pieAngle = 360 - abs(round(startVector.as_polar()[1] - endVector.as_polar()[1]))
 
-    for i in range(x, 0, -1):
+    for i in range(pieAngle, 0, -1):
         pass
         points.append(pieCenter + startVector.rotate(i) * r)
 
