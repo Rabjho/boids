@@ -10,7 +10,6 @@ def main(size=(1280, 720), fullscreen=False):
 
     # size = lastState[0]
     # fullscreen = lastState[1]
-    backgroundColour = "#3E4D66"
     demonstrate = False
     mode = State(3)
 
@@ -26,7 +25,8 @@ def main(size=(1280, 720), fullscreen=False):
     clock = pg.time.Clock()
 
 
-    palette = ["#00AFB9", "#f26076", "#6EB257", "#F3F719", "#FFFFFF", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
+    backgroundColour = "#252530"
+    palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
 
 
     # TODO Fit the OG logo colour palette into the palette above
@@ -43,12 +43,21 @@ def main(size=(1280, 720), fullscreen=False):
         predators.append(Predator(screen, 12, boids, 150))
 
 
+    windPointerMargin = 30
+
+    windDirection = pg.Vector2(1,0)
+    windArrow = WindPointer(screen, 15, windPointerMargin)
+    windTurnSpeed = 5
+    windStrength = 0.5
+
+
+    heldKeys = {"K_LEFT" : False, "K_RIGHT" : False}
 
     while True:
         for event in pg.event.get():
             if (event.type == pg.QUIT):
                 sys.exit()
-            if (event.type == pg.KEYDOWN):
+            elif (event.type == pg.KEYDOWN):
                 if (event.key == pg.K_r):
                     main(screen.get_size(), fullscreen)
                 
@@ -81,8 +90,13 @@ def main(size=(1280, 720), fullscreen=False):
                             boid.walls = True
                         for predator in predators:
                             predator.walls = True
-
                     mode.next()
+
+                if (event.key == pg.K_LEFT):
+                    heldKeys["K_LEFT"] = True
+                if (event.key == pg.K_RIGHT):
+                    heldKeys["K_RIGHT"] = True
+
 
                 if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
                     fullscreen = not fullscreen
@@ -100,17 +114,30 @@ def main(size=(1280, 720), fullscreen=False):
                         if (not boid.demonstrating):
                             boid.trailing = not boid.trailing
                     
+            elif (event.type == pg.KEYUP):
+                if (event.key == pg.K_LEFT):
+                    heldKeys["K_LEFT"] = False
+                if (event.key == pg.K_RIGHT):
+                    heldKeys["K_RIGHT"] = False
 
+
+        if (heldKeys["K_LEFT"]):
+            windDirection.rotate_ip(-windTurnSpeed)
+        if (heldKeys["K_RIGHT"]):
+            windDirection.rotate_ip(windTurnSpeed)
                         
         clock.tick(60)
 
         screen.fill(backgroundColour)
 
         for boid in boids:
-            boid.live(boids, predators)
+            boid.live(boids, predators, windDirection = windDirection, windStrength = windStrength)
 
         for predator in predators:
-            predator.live()
+            predator.live(windDirection = windDirection, windStrength = windStrength)
+
+
+        windArrow.live(windDirection)
 
         pg.display.flip()
 

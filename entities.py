@@ -1,5 +1,6 @@
 from ctypes import alignment
 import sys,pygame as pg
+from matplotlib.pyplot import margins
 from pygame import gfxdraw
 from random import randrange, uniform, choice
 from auxFunctions import *
@@ -56,7 +57,8 @@ class Entity:
     def movement(self):
         self.position = self.position + self.velocity * self.deltaTime   
 
-        if self.velocity.length() >= self.vLimit:
+        if (self.velocity.length() >= self.vLimit and self.vLimit != 0):
+            
             self.velocity = self.velocity.normalize() * self.vLimit
 
 
@@ -133,6 +135,14 @@ class Entity:
 
         return avoidanceVector
 
+    def wind(self, direction = pg.Vector2(0,0), strength=0):
+        try:
+            return direction.normalize() * strength
+        except:
+            return direction
+
+
+
 class Boid(Entity):
     def __init__(self, surface, radius, searchRadius, vLimit):
         super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
@@ -140,11 +150,6 @@ class Boid(Entity):
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
         self.searchRadius = searchRadius
 
-        self.cohesionStrength = 3
-        self.seprationStrength = 15
-        self.alignmentStrength = 7.5
-        self.predatorAvoidStrength = 20
-        self.predatorAwarenessFactor = 2
 
         self.demonstrating = False
         self.demonstrateBoidColor = pg.Color(150,160,160,80)
@@ -180,7 +185,7 @@ class Boid(Entity):
                 self.baseVelocity += pg.Vector2((rule1 / len(self.boidsInRange) - self.position)).normalize() * self.cohesionStrength
 
             if (rule2.length() != 0):
-                self.baseVelocity += rule2.normalize() * self.seprationStrength
+                self.baseVelocity += rule2.normalize() * self.seperationStrength
 
             if (rule3.length() != 0):
                 self.baseVelocity += pg.Vector2((rule3 / len(self.boidsInRange))).normalize() * self.alignmentStrength
@@ -192,11 +197,10 @@ class Boid(Entity):
                 predatorAvoidance += predator.position
 
             if (predatorAvoidance.length() != 0):
-                self.baseVelocity -= pg.Vector2((predatorAvoidance / len(self.predatorsInRange) - self.position)).normalize() * self.predatorAvoidStrength
+                    self.baseVelocity -= pg.Vector2((predatorAvoidance / len(self.predatorsInRange) - self.position)).normalize() * self.predatorAvoidStrength
 
 
-        
-        self.activeEffects = [self.baseVelocity, self.randomness(10), self.avoidWalls(5 * self.walls)]
+        self.activeEffects = [self.baseVelocity, self.randomness(10), self.avoidWalls(5 * self.walls), self.wind(self.windDirection, self.windStrength)]
   
         for effect in self.activeEffects:
             self.velocity += effect
@@ -207,8 +211,16 @@ class Boid(Entity):
 
         self.bounceOfWalls()
 
-    def live(self, boids, predators):
+    def live(self, boids, predators, cohesionStrength = 3, seperationStrength = 15, alignmentStrength = 7.5, predatorAvoidStrength = 20, predatorAwarenessFactor = 2, windDirection = pg.Vector2(0,0), windStrength = 0):
+        self.cohesionStrength = 3
+        self.seperationStrength = 15
+        self.alignmentStrength = 7.5
+        self.predatorAvoidStrength = 20
+        self.predatorAwarenessFactor = 2
         
+        self.windDirection = windDirection
+        self.windStrength = windStrength
+
         self.boids = boids
         self.enemies = predators
 
@@ -277,10 +289,15 @@ class Predator(Entity):
         self.timeToNewTarget = uniform(3, 8)
         self.cooldownTargetChange = pg.time.get_ticks()
 
+    def live(self, windDirection = pg.Vector2(0,0), windStrength = 0):
+        self.windDirection = windDirection
+        self.windStrength = windStrength
+        super().live()
+
     def movement(self):
         self.baseTracking = (pg.Vector2(self.target.position)-pg.Vector2(self.position)).normalize() * self.trackingStrength
         
-        self.activeEffects = [self.baseTracking, self.avoidWalls(5 * self.walls)]
+        self.activeEffects = [self.baseTracking, self.avoidWalls(5 * self.walls), self.wind()]
 
         for effect in self.activeEffects:
             self.velocity += effect
@@ -292,3 +309,22 @@ class Predator(Entity):
         super().movement()
         
         self.bounceOfWalls()
+
+class WindPointer(Entity):
+    def __init__(self, surface, radius = 15, margin = 30, rotation=pg.Vector2(0, 1), antiAliasing=True):
+        vLimit = 0
+        self.margin = margin
+        self.surface = surface
+        position = pg.Vector2(self.margin, self.surface.get_height()-self.margin)
+        super().__init__(surface, position, radius, vLimit, rotation, antiAliasing)
+
+        self.color = "#6b6b8c"
+
+    def movement(self):
+        super().movement()
+
+        self.position = pg.Vector2(self.margin, self.surface.get_height()-self.margin)
+
+    def live(self, windDirection = pg.Vector2(0,1)):
+        self.rotation = windDirection.normalize()
+        super().live()
