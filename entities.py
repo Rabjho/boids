@@ -1,6 +1,5 @@
 from ctypes import alignment
 import sys,pygame as pg
-from matplotlib.pyplot import margins
 from pygame import gfxdraw
 from random import randrange, uniform, choice
 from auxFunctions import *
@@ -13,6 +12,9 @@ class Entity:
         self.vLimit = vLimit
         self.radius = radius
         self.rotation = rotation
+
+
+
         self.angle = 120 # Add to arguments that can be controlled w/ default
         self.color = "#00afb9" # Add to arguments that can be controlled w/ default
         self.wallMargin = 125 # Add to arguments that can be controlled w/ default
@@ -55,6 +57,7 @@ class Entity:
         self.trailPoints.append((self.position, pg.time.get_ticks()))
 
     def movement(self):
+
         self.position = self.position + self.velocity * self.deltaTime   
 
         if (self.velocity.length() >= self.vLimit and self.vLimit != 0):
@@ -143,13 +146,14 @@ class Entity:
 
 
 
+
 class Boid(Entity):
     def __init__(self, surface, radius, searchRadius, vLimit):
         super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
         self.searchRadius = searchRadius
-
+        self.boidsInRange = []
 
         self.demonstrating = False
         self.demonstrateBoidColor = pg.Color(150,160,160,80)
@@ -201,7 +205,7 @@ class Boid(Entity):
 
 
         self.activeEffects = [self.baseVelocity, self.randomness(10), self.avoidWalls(5 * self.walls), self.wind(self.windDirection, self.windStrength)]
-  
+        # self.activeEffects = [self.baseVelocity]
         for effect in self.activeEffects:
             self.velocity += effect
 

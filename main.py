@@ -35,21 +35,23 @@ def main(size=(1280, 720), fullscreen=False):
     closest = [0, float('inf')]
     boids = []
 
+    grid = Grid(screen, 50)
+
     for i in range(100):
         boids.append(Boid(screen, 10, 50, 200))
 
     predators = []
-    for i in range(10):
+    for i in range(0):
         predators.append(Predator(screen, 12, boids, 150))
 
 
+
     windPointerMargin = 30
-
-    windDirection = pg.Vector2(1,0)
     windArrow = WindPointer(screen, 15, windPointerMargin)
-    windTurnSpeed = 5
-    windStrength = 0.5
-
+    windDirection = pg.Vector2(1,0)
+    windTurnSpeed = 360
+    windStrength = 10
+    windToggle = False
 
     heldKeys = {"K_LEFT" : False, "K_RIGHT" : False}
 
@@ -92,6 +94,10 @@ def main(size=(1280, 720), fullscreen=False):
                             predator.walls = True
                     mode.next()
 
+                if (event.key == pg.K_w):
+                    windToggle = not windToggle
+
+
                 if (event.key == pg.K_LEFT):
                     heldKeys["K_LEFT"] = True
                 if (event.key == pg.K_RIGHT):
@@ -122,22 +128,26 @@ def main(size=(1280, 720), fullscreen=False):
 
 
         if (heldKeys["K_LEFT"]):
-            windDirection.rotate_ip(-windTurnSpeed)
+            windDirection.rotate_ip(-windTurnSpeed * clock.get_time() / 1000)
         if (heldKeys["K_RIGHT"]):
-            windDirection.rotate_ip(windTurnSpeed)
+            windDirection.rotate_ip(windTurnSpeed * clock.get_time() / 1000)
                         
         clock.tick(60)
 
         screen.fill(backgroundColour)
 
+        # grid.handleBoids()
+
         for boid in boids:
-            boid.live(boids, predators, windDirection = windDirection, windStrength = windStrength)
+            boid.live(boids, predators, windDirection = windDirection, windStrength = windStrength * windToggle)
 
         for predator in predators:
             predator.live(windDirection = windDirection, windStrength = windStrength)
 
+        # grid.drawGrid()
 
-        windArrow.live(windDirection)
+        if (windToggle):
+            windArrow.live(windDirection)
 
         pg.display.flip()
 
