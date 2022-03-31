@@ -9,17 +9,19 @@ class Boundary():
 
 
     def contains(self, object) -> bool:
-        return (object.position.x >= self.x - self.w and 
+        return (
+            object.position.x >= self.x - self.w and 
             object.position.x <= self.x + self.w and
             object.position.y >= self.y - self.h and
             object.position.y <= self.y + self.h
         )
 
     def intersects(self, range) -> bool:
-        return not (range.x - range.w > self.x + self.w or 
-        range.x + range.w < self.x - self.w or
-        range.y - range.h > self.y + self.h or
-        range.y + range.h < self.y - self.h 
+        return not (
+            range.x - range.w > self.x + self.w or 
+            range.x + range.w < self.x - self.w or
+            range.y - range.h > self.y + self.h or
+            range.y + range.h < self.y - self.h 
         )
 
 class QuadTree():
@@ -47,19 +49,16 @@ class QuadTree():
             elif (self.southeast.insert(object)): return True
 
     def subdivide(self):
-        nw = Boundary(self.boundary.x - self.boundary.w / 2, self.boundary.y - self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2)
-        ne = Boundary(self.boundary.x + self.boundary.w / 2, self.boundary.y - self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2)
-        sw = Boundary(self.boundary.x - self.boundary.w / 2, self.boundary.y + self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2)
-        se = Boundary(self.boundary.x + self.boundary.w / 2, self.boundary.y + self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2)
-        self.northwest = QuadTree(nw, self.capacity)
-        self.northeast = QuadTree(ne, self.capacity)
-        self.southwest = QuadTree(sw, self.capacity)
-        self.southeast = QuadTree(se, self.capacity)
+        self.northwest = QuadTree(Boundary(self.boundary.x - self.boundary.w / 2, self.boundary.y - self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2), self.capacity)
+        self.northeast = QuadTree(Boundary(self.boundary.x + self.boundary.w / 2, self.boundary.y - self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2), self.capacity)
+        self.southwest = QuadTree(Boundary(self.boundary.x - self.boundary.w / 2, self.boundary.y + self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2), self.capacity)
+        self.southeast = QuadTree(Boundary(self.boundary.x + self.boundary.w / 2, self.boundary.y + self.boundary.h / 2, self.boundary.w / 2, self.boundary.h / 2), self.capacity)
         self.divided = True
 
     def query(self, range):
         foundObjects = []
-        if (not self.boundary.intersects(range)): return foundObjects
+        if (not self.boundary.intersects(range)): 
+            return foundObjects
 
         else:
             for object in self.objects:

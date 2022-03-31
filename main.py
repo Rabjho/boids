@@ -6,58 +6,68 @@ from auxFunctions import State
 from quadtree import Boundary, QuadTree
 
 def main(size=(1280, 720), fullscreen=False):
-    print("started simulation")
+
+    numberOfBoids = 100
+    numberOfPredators = 10
+    backgroundColour = "#252530"
+    palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
+    windTurnSpeed = 360
+
+    windStrength = 10
+    trackingStrength = 10
+
+
+    windPointerWallMargin = 30
+
+    qtreeBoidsCapacity = 10
+    qtreePredatorCapacity = 3
+
+
+
     pg.init()
-
-    # size = lastState[0]
-    # fullscreen = lastState[1]
-    demonstrate = False
-    mode = State(3)
-
     if (fullscreen):
         screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
     else:
         screen = pg.display.set_mode(size, pg.RESIZABLE)
-        
-
     pg.display.set_caption('Boids vs predators')
     Icon = pg.image.load('Assets/Logo.png')
     pg.display.set_icon(Icon)
     clock = pg.time.Clock()
 
 
-    rabjhoPalette = ["#252530", "#ff2625", "#31b5d1", "#a9a9a9"]
-    backgroundColour = "#252530"
-    palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
-
-
-    closest = [0, float('inf')]
+    demonstrate = False
+    mode = State(3)
+    activeDemo = [0, float('inf')]    
     boids = []
-    qtreeBoidsCapacity = 10
-    qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
-
-    qtreePredatorCapacity = 3
-    qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
-
     predators = []
-        
-    for i in range(100):
-        boids.append(Boid(screen, qtreeBoids, qtreePredator, 10, 50, 200))
-
-    for i in range(10):
-        predators.append(Predator(screen, qtreePredator, 12, boids, 150))
-
-
-    windPointerMargin = 30
-    windArrow = WindPointer(screen, 15, windPointerMargin)
-    windDirection = pg.Vector2(1,0)
-    windTurnSpeed = 360
-    windStrength = 10
     windToggle = False
-
+    windDirection = pg.Vector2(1,0)
     heldKeys = {"K_LEFT" : False, "K_RIGHT" : False}
 
+
+
+    qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
+    qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
+
+# TODO Set swap constants for variables initialised at the top of main  
+    for i in range(numberOfBoids):
+        boids.append(Boid(screen, qtreeBoids, qtreePredator, 10, 50, 200))
+
+    for i in range(numberOfPredators):
+        predators.append(Predator(screen, qtreePredator, 12, boids, 150))
+
+    windArrow = WindPointer(screen, 15, windPointerWallMargin)
+#
+
+
     while True:
+        clock.tick(60)
+        screen.fill(backgroundColour)
+
+
+# TODO Clean this code tremendously
+
+# START INPUT HANDLER
         for event in pg.event.get():
             if (event.type == pg.QUIT):
                 sys.exit()
@@ -65,15 +75,24 @@ def main(size=(1280, 720), fullscreen=False):
                 if (event.key == pg.K_r):
                     main(screen.get_size(), fullscreen)
                 
+                if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
+                    fullscreen = not fullscreen
+                    if (fullscreen):
+                        size = pg.display.get_window_size()
+                        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
+                    else:
+                        screen = pg.display.set_mode(size, pg.RESIZABLE)
+
+
                 if (event.key == pg.K_d):
                     if (not demonstrate):
-                        closest[1] = pg.Vector2(boids[closest[0]].position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))
+                        activeDemo[1] = pg.Vector2(boids[activeDemo[0]].position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))
                         for boid in boids:
-                            if (pg.Vector2(boid.position).distance_squared_to(pg.Vector2(pg.mouse.get_pos())) < closest[1]):
-                                closest = [boids.index(boid), pg.Vector2(boid.position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))]
-                        boids[closest[0]].demonstrating = True
+                            if (pg.Vector2(boid.position).distance_squared_to(pg.Vector2(pg.mouse.get_pos())) < activeDemo[1]):
+                                activeDemo = [boids.index(boid), pg.Vector2(boid.position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))]
+                        boids[activeDemo[0]].demonstrating = True
                     else:
-                        boids[closest[0]].demonstrating = False
+                        boids[activeDemo[0]].demonstrating = False
                     demonstrate = not demonstrate
 
                 if (event.key == pg.K_m):
@@ -106,12 +125,6 @@ def main(size=(1280, 720), fullscreen=False):
                     heldKeys["K_RIGHT"] = True
 
 
-                if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
-                    fullscreen = not fullscreen
-                    if (fullscreen):
-                        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
-                    else:
-                        screen = pg.display.set_mode(size, pg.RESIZABLE)
 
                 if (event.key > pg.K_0 and event.key <= pg.K_9):
                     for boid in boids:
@@ -121,6 +134,7 @@ def main(size=(1280, 720), fullscreen=False):
                     for boid in boids:
                         if (not boid.demonstrating):
                             boid.trailing = not boid.trailing
+
                     
             elif (event.type == pg.KEYUP):
                 if (event.key == pg.K_LEFT):
@@ -133,35 +147,25 @@ def main(size=(1280, 720), fullscreen=False):
             windDirection.rotate_ip(-windTurnSpeed * clock.get_time() / 1000)
         if (heldKeys["K_RIGHT"]):
             windDirection.rotate_ip(windTurnSpeed * clock.get_time() / 1000)
-                        
-        clock.tick(60)
+# END INPUT HANDLER
 
-        screen.fill(backgroundColour)
         qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
         qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
-
         for predator in predators:
-            predator.live(windDirection = windDirection, windStrength = windStrength * windToggle)
+            predator.live(trackingStrength = trackingStrength, windDirection = windDirection, windStrength = windStrength * windToggle)
             qtreePredator.insert(predator)
             
-
         for boid in boids:
             boid.live(windDirection = windDirection, windStrength = windStrength * windToggle)
             qtreeBoids.insert(boid)
 
-
         if (windToggle):
             windArrow.live(windDirection)
-
-        print(clock.get_fps())
 
         pg.display.flip()
 
 
 if (__name__ == "__main__"):
+    print("Started simulation")
     main()
-
-
-
-
