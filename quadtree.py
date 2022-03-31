@@ -1,4 +1,4 @@
-
+import pygame as pg
 
 class Boundary():
     def __init__(self, x, y, sizeX, sizeY) -> None:
@@ -6,7 +6,6 @@ class Boundary():
         self.y = y
         self.w = sizeX
         self.h = sizeY
-
 
     def contains(self, object) -> bool:
         return (
@@ -23,6 +22,14 @@ class Boundary():
             range.y - range.h > self.y + self.h or
             range.y + range.h < self.y - self.h 
         )
+
+    def debug(self, surface):
+        rect = pg.Rect(surface, 10, 10, 10,10)
+        rect.w = self.w
+        rect.h = self.h
+        rect.center = (self.x, self.y)
+        pg.draw.rect(surface, pg.Color(0,0,0,100), rect)
+        return self
 
 class QuadTree():
     def __init__(self, boundary, capacity) -> None:

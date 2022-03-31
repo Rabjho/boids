@@ -6,22 +6,41 @@ from auxFunctions import State
 from quadtree import Boundary, QuadTree
 
 def main(size=(1280, 720), fullscreen=False):
-
-    numberOfBoids = 100
-    numberOfPredators = 10
     backgroundColour = "#252530"
-    palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
+    windStrength = 5
     windTurnSpeed = 360
 
-    windStrength = 10
-    trackingStrength = 10
+    templates = {
+        "default" : 
+        {
+            "boids" : 250,
+            "boidSize" : 10,
+            "predators" : 0,
+            "predatorSize" : 12,
+            "boidSpeedLimit" : 200,
+            "boidSearchRadius" : 50,
+            "cohesionStrength" : 3,
+            "seperationStrength" : 15,
+            "alignmentStrength" : 7.5,
+            "predatorAvoidStrength" : 20,
+            "predatorAwarenessFactor" : 2,
+            "predatorSpeedLimit" : 150,
+            "predatorTrackingStrength" : 10
+        }
+    }
+
+    activeTemplate = templates["default"]
 
 
+    palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
+
+    windPointerSize = 15
     windPointerWallMargin = 30
 
-    qtreeBoidsCapacity = 10
-    qtreePredatorCapacity = 3
 
+
+    qtreeBoidsCapacity = 3
+    qtreePredatorCapacity = 3
 
 
     pg.init()
@@ -49,20 +68,19 @@ def main(size=(1280, 720), fullscreen=False):
     qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
     qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
-# TODO Set swap constants for variables initialised at the top of main  
-    for i in range(numberOfBoids):
-        boids.append(Boid(screen, qtreeBoids, qtreePredator, 10, 50, 200))
+    for i in range(activeTemplate["boids"]):
+        boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSize"]))
 
-    for i in range(numberOfPredators):
-        predators.append(Predator(screen, qtreePredator, 12, boids, 150))
+    for i in range(activeTemplate["predators"]):
+        predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"]))
 
-    windArrow = WindPointer(screen, 15, windPointerWallMargin)
-#
+    windArrow = WindPointer(screen, windPointerSize, windPointerWallMargin)
 
 
     while True:
         clock.tick(60)
         screen.fill(backgroundColour)
+        print(clock.get_fps())
 
 
 # TODO Clean this code tremendously
@@ -125,7 +143,6 @@ def main(size=(1280, 720), fullscreen=False):
                     heldKeys["K_RIGHT"] = True
 
 
-
                 if (event.key > pg.K_0 and event.key <= pg.K_9):
                     for boid in boids:
                         boid.color = pg.Color(random.choice(palette[:event.key-48]))
@@ -153,11 +170,11 @@ def main(size=(1280, 720), fullscreen=False):
         qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
         for predator in predators:
-            predator.live(trackingStrength = trackingStrength, windDirection = windDirection, windStrength = windStrength * windToggle)
+            predator.live(activeTemplate["predatorSpeedLimit"], activeTemplate["predatorTrackingStrength"], windDirection, windStrength * windToggle)
             qtreePredator.insert(predator)
             
         for boid in boids:
-            boid.live(windDirection = windDirection, windStrength = windStrength * windToggle)
+            boid.live(activeTemplate["boidSpeedLimit"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"], windDirection, windStrength * windToggle)
             qtreeBoids.insert(boid)
 
         if (windToggle):
