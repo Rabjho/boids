@@ -3,6 +3,7 @@ from matplotlib.pyplot import close
 from entities import *
 import random
 from auxFunctions import State
+from quadtree import Boundary, QuadTree
 
 def main(size=(1280, 720), fullscreen=False):
     print("started simulation")
@@ -19,31 +20,32 @@ def main(size=(1280, 720), fullscreen=False):
         screen = pg.display.set_mode(size, pg.RESIZABLE)
         
 
-    pg.display.set_caption('Boids')
+    pg.display.set_caption('Boids vs predators')
     Icon = pg.image.load('Assets/Logo.png')
     pg.display.set_icon(Icon)
     clock = pg.time.Clock()
 
 
+    rabjhoPalette = ["#252530", "#ff2625", "#31b5d1", "#a9a9a9"]
     backgroundColour = "#252530"
     palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
 
 
-    # TODO Fit the OG logo colour palette into the palette above
-    rabjhoPalette = ["#252530", "#ff2625", "#31b5d1", "#a9a9a9"]
-
     closest = [0, float('inf')]
     boids = []
+    qtreeBoidsCapacity = 10
+    qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
 
-    grid = Grid(screen, 50)
-
-    for i in range(100):
-        boids.append(Boid(screen, 10, 50, 200))
+    qtreePredatorCapacity = 3
+    qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
     predators = []
-    for i in range(0):
-        predators.append(Predator(screen, 12, boids, 150))
+        
+    for i in range(100):
+        boids.append(Boid(screen, qtreeBoids, qtreePredator, 10, 50, 200))
 
+    for i in range(10):
+        predators.append(Predator(screen, qtreePredator, 12, boids, 150))
 
 
     windPointerMargin = 30
@@ -135,19 +137,24 @@ def main(size=(1280, 720), fullscreen=False):
         clock.tick(60)
 
         screen.fill(backgroundColour)
+        qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
+        qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
-        # grid.handleBoids()
-
-        for boid in boids:
-            boid.live(boids, predators, windDirection = windDirection, windStrength = windStrength * windToggle)
 
         for predator in predators:
-            predator.live(windDirection = windDirection, windStrength = windStrength)
+            predator.live(windDirection = windDirection, windStrength = windStrength * windToggle)
+            qtreePredator.insert(predator)
+            
 
-        # grid.drawGrid()
+        for boid in boids:
+            boid.live(windDirection = windDirection, windStrength = windStrength * windToggle)
+            qtreeBoids.insert(boid)
+
 
         if (windToggle):
             windArrow.live(windDirection)
+
+        print(clock.get_fps())
 
         pg.display.flip()
 

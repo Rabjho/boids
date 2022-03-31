@@ -3,6 +3,7 @@ import sys,pygame as pg
 from pygame import gfxdraw
 from random import randrange, uniform, choice
 from auxFunctions import *
+from quadtree import Boundary
 
 
 class Entity:
@@ -148,12 +149,15 @@ class Entity:
 
 
 class Boid(Entity):
-    def __init__(self, surface, radius, searchRadius, vLimit):
+    def __init__(self, surface, boidsQuadTree, predatorQuadTree, radius, searchRadius, vLimit):
         super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
         self.searchRadius = searchRadius
         self.boidsInRange = []
+        self.boidsQuadTree = boidsQuadTree
+        self.boidsQuadTree.insert(self)
+        self.predatorsQuadTree = predatorQuadTree
 
         self.demonstrating = False
         self.demonstrateBoidColor = pg.Color(150,160,160,80)
@@ -212,26 +216,31 @@ class Boid(Entity):
 
 
         super().movement()
-
         self.bounceOfWalls()
 
-    def live(self, boids, predators, cohesionStrength = 3, seperationStrength = 15, alignmentStrength = 7.5, predatorAvoidStrength = 20, predatorAwarenessFactor = 2, windDirection = pg.Vector2(0,0), windStrength = 0):
-        self.cohesionStrength = 3
-        self.seperationStrength = 15
-        self.alignmentStrength = 7.5
-        self.predatorAvoidStrength = 20
-        self.predatorAwarenessFactor = 2
+    def live(self, cohesionStrength = 3, seperationStrength = 15, alignmentStrength = 7.5, predatorAvoidStrength = 20, predatorAwarenessFactor = 2, windDirection = pg.Vector2(0,0), windStrength = 0):
+        self.cohesionStrength = cohesionStrength
+        self.seperationStrength = seperationStrength
+        self.alignmentStrength = alignmentStrength
+        self.predatorAvoidStrength = predatorAvoidStrength
+        self.predatorAwarenessFactor = predatorAwarenessFactor
         
         self.windDirection = windDirection
         self.windStrength = windStrength
 
-        self.boids = boids
-        self.enemies = predators
+# This is the O(n^2) check for boids and predators in range
+        # self.boids = boids
+        # self.enemies = predators
 
-        self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boids if inPie(boid.position, self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
-        self.predatorsInRange = [predator for predator in self.enemies if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1])]
+        # self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boids if inPie(boid.position, self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
+        # self.predatorsInRange = [predator for predator in self.enemies if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1])]
+
+# This is the O(n*log(n)) check for boids in range using quadtree
+        self.boidsInRange = [(boid, boid.color == self.color) for boid in self.boidsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius, self.searchRadius)) if inPie(boid.position, self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
+        self.predatorsInRange = [predator for predator in self.predatorsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius * self.predatorAwarenessFactor, self.searchRadius * self.predatorAwarenessFactor)) if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1])]
 
         super().live()
+        
 
 
     def demonstrate(self):
@@ -240,47 +249,10 @@ class Boid(Entity):
             gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateBoidColor)
 
 
-
-# Former functions for the three base rules of the boids algorithm. 
-# They have been merged to avoid iterating through boidsInRange thrice.
-
-    # def cohesion(self, strength=0):
-    #     centerBoids = pg.Vector2(0,0)
-    #     if (len(self.boidsInRange) != 0):
-    #         for boid in self.boidsInRange:
-    #             centerBoids += boid[0].position * boid[1]
-
-    #         centerBoids = pg.Vector2((centerBoids / len(self.boidsInRange) - self.position))
-    #         return centerBoids.normalize() * strength
-
-    #     return centerBoids
-
-    # def seperation(self, strength=0):
-    #     avoidanceVector = pg.Vector2(0,0)
-    #     if (len(self.boidsInRange) != 0):
-    #         for boid in self.boidsInRange:
-    #             if (boid[0].position.distance_to(self.position) < self.radius * 2):
-    #                 avoidanceVector -= boid[0].position - self.position
-    #         if (avoidanceVector.length() != 0):
-    #             return avoidanceVector.normalize() * strength
-
-    #     return avoidanceVector
-
-    # def alignment(self, strength=0):
-    #     directionBoids = pg.Vector2(0,0)
-    #     if (len(self.boidsInRange) != 0):
-    #         for boid in self.boidsInRange:
-    #             directionBoids += boid[0].velocity * boid[1]
-
-    #         directionBoids = pg.Vector2((directionBoids / len(self.boidsInRange)))
-    #         if (directionBoids.length() != 0):
-    #             return directionBoids.normalize() * strength
-
-    #     return directionBoids
-
 class Predator(Entity):
-    def __init__(self, surface, radius, boids, vLimit):
+    def __init__(self, surface, qtreePredator, radius, boids, vLimit):
         super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
+
 
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
@@ -292,6 +264,9 @@ class Predator(Entity):
         self.target = choice(self.boids) 
         self.timeToNewTarget = uniform(3, 8)
         self.cooldownTargetChange = pg.time.get_ticks()
+
+        self.qtreePredator = qtreePredator
+        self.qtreePredator.insert(self)
 
     def live(self, windDirection = pg.Vector2(0,0), windStrength = 0):
         self.windDirection = windDirection
