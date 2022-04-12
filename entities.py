@@ -1,5 +1,5 @@
 from ctypes import alignment
-import sys,pygame as pg
+import pygame as pg
 from pygame import gfxdraw
 from random import randrange, uniform, choice
 from auxfunctions import *
