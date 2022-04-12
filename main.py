@@ -1,5 +1,5 @@
+from re import A
 import sys,pygame as pg
-from matplotlib.pyplot import close
 from entities import *
 import random
 from auxfunctions import State
@@ -26,19 +26,32 @@ def main(size=(1280, 720), fullscreen=False):
             "predatorAvoidStrength" : 20,
             "predatorAwarenessFactor" : 2,
             "predatorSpeedLimit" : 150,
+        },
+        "speed" : 
+        {
+            "boids" : 10,
+            "boidSize" : 10,
+            "predators" : 5,
+            "predatorSize" : 12,
+            "boidSpeedLimit" : 2000,
+            "boidSearchRadius" : 50,
+            "cohesionStrength" : 15,
+            "seperationStrength" : 30,
+            "alignmentStrength" : 25,
+            "mouseTrackingStrength" : 5,
+            "predatorAvoidStrength" : 200,
+            "predatorAwarenessFactor" : 2,
+            "predatorSpeedLimit" : 150,
         }
     }
-
+    
     activeTemplate = templates["default"]
-
     templateController = State(len(templates))
 
     palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
 
     windPointerSize = 15
     windPointerWallMargin = 30
-
-
 
     qtreeBoidsCapacity = 3
     qtreePredatorCapacity = 3
@@ -149,6 +162,47 @@ def main(size=(1280, 720), fullscreen=False):
                     for boid in boids:
                         if (not boid.demonstrating):
                             boid.trailing = not boid.trailing
+                
+                if (event.key == pg.K_q or event.key == pg.K_e):
+                    if (event.key == pg.K_q):
+                        templateController.prior()
+                    
+                    if (event.key == pg.K_e):
+                        templateController.next()
+
+                    activeTemplate = templates[list(templates)[templateController.current]]
+
+                    if (len(boids) < activeTemplate["boids"]):
+                        for i in range(activeTemplate["boids"] - len(boids)):
+                            boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]))
+
+                    elif (len(boids) > activeTemplate["boids"]):
+                        for i in range(len(boids) - activeTemplate["boids"]):
+                            boids.pop(-1)
+
+                    if (len(predators) < activeTemplate["predators"]):
+                        for i in range(activeTemplate["predators"] - len(predators)):
+                            predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorSpeedLimit"]))
+
+                    elif (len(predators) > activeTemplate["predators"]):
+                        for i in range(len(predators) - activeTemplate["predators"]):
+                            predators.pop(-1)
+
+                    for boid in boids:
+                        boid.vLimit = activeTemplate["boidSpeedLimit"]
+                        boid.radius = activeTemplate["boidSize"]
+                        boid.searchRadius = activeTemplate["boidSearchRadius"]
+                        boid.cohesionStrength = activeTemplate["cohesionStrength"]
+                        boid.seperationStrength = activeTemplate["seperationStrength"]
+                        boid.alignmentStrength = activeTemplate["alignmentStrength"]
+                        boid.predatorAvoidStrength = activeTemplate["predatorAvoidStrength"]
+                        boid.predatorAwarenessFactor = activeTemplate["predatorAwarenessFactor"]    
+
+                    for predator in predators:
+                        predator.radius = activeTemplate["predatorSize"]
+                        predator.vLimit = activeTemplate["predatorSpeedLimit"]
+
+
          
             elif (event.type == pg.KEYUP):
                 if (event.key == pg.K_LEFT):
@@ -178,6 +232,12 @@ def main(size=(1280, 720), fullscreen=False):
             windArrow.live(windDirection)
 
         pg.display.flip()
+
+
+
+
+
+
 
 
 if (__name__ == "__main__"):
