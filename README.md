@@ -1,5 +1,5 @@
 # boids
-Boids implementation
+Boids implementation w/ ability to make templates. Done using quadtrees in pygame. I recommend no more than 250 boids on a beefy laptop 
 
 ## Keybinds  
 |Key|Action|
