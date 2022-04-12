@@ -31,6 +31,8 @@ def main(size=(1280, 720), fullscreen=False):
 
     activeTemplate = templates["default"]
 
+    templateController = State(len(templates))
+
     palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
 
     windPointerSize = 15
@@ -133,7 +135,6 @@ def main(size=(1280, 720), fullscreen=False):
 
                 if (event.key == pg.K_w):
                     windToggle = not windToggle
-
 
                 if (event.key == pg.K_LEFT):
                     heldKeys["K_LEFT"] = True
