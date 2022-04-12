@@ -44,7 +44,6 @@ class State:
     def next(self):
         self.current += 1
         self.current %= self.modes
-        print(self.current)
 
 
     def prior(self):

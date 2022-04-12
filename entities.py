@@ -299,7 +299,7 @@ class WindPointer(Entity):
         self.margin = margin
         self.surface = surface
         position = pg.Vector2(self.margin, self.surface.get_height()-self.margin)
-        super().__init__(surface, position, radius, pg.Vector2(0, 1), antiAliasing)
+        super().__init__(surface, position, radius, 0, pg.Vector2(0, 1), antiAliasing)
 
         self.color = "#6b6b8c"
 

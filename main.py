@@ -234,12 +234,6 @@ def main(size=(1280, 720), fullscreen=False):
         pg.display.flip()
 
 
-
-
-
-
-
-
 if (__name__ == "__main__"):
     print("Started simulation")
     main()
