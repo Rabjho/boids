@@ -7,7 +7,7 @@ from quadtree import Boundary
 
 
 class Entity:
-    def __init__(self, surface, position, radius, rotation=pg.Vector2(0,1), antiAliasing = True) -> None:
+    def __init__(self, surface, position, radius, vLimit = 0, rotation=pg.Vector2(0,1), antiAliasing = True) -> None:
         self.surface = surface
         self.position = position
         self.radius = radius
@@ -27,10 +27,10 @@ class Entity:
         self.trailPoints = [(self.position, pg.time.get_ticks())]
         self.trailLength = 0.3
 
-
-    def live(self, vLimit = 0) -> None:
-        self.clock.tick()
         self.vLimit = vLimit
+
+    def live(self) -> None:
+        self.clock.tick()
         self.deltaTime = self.clock.get_time() / 1000
 
         self.rWingVector = self.rotation.rotate(self.angle)
@@ -134,10 +134,8 @@ class Entity:
             except:
                 pass
 
-
-
 class Boid(Entity):
-    def __init__(self, surface, boidsQuadTree, predatorQuadTree, radius) -> None:
+    def __init__(self, surface, boidsQuadTree, predatorQuadTree, vLimit, radius, searchRadius, cohesionStrength = 3, seperationStrength = 15, alignmentStrength = 7.5, predatorAvoidStrength = 20, predatorAwarenessFactor = 2) -> None:
         super().__init__(surface, pg.Vector2(0,0), radius)
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
@@ -150,7 +148,7 @@ class Boid(Entity):
         self.demonstrateBoidColor = pg.Color(150,160,160,80)
         self.demonstratePredatorColor = pg.Color(255,120,120,20)
 
-    def live(self, vLimit, searchRadius, cohesionStrength = 3, seperationStrength = 15, alignmentStrength = 7.5, predatorAvoidStrength = 20, predatorAwarenessFactor = 2, windDirection = pg.Vector2(0,0), windStrength = 0) -> None:
+
         self.searchRadius = searchRadius
         self.cohesionStrength = cohesionStrength
         self.seperationStrength = seperationStrength
@@ -158,10 +156,13 @@ class Boid(Entity):
         self.predatorAvoidStrength = predatorAvoidStrength
         self.predatorAwarenessFactor = predatorAwarenessFactor
         
+
+    def live(self, windDirection = pg.Vector2(0,0), windStrength = 0) -> None:
+
         self.windDirection = windDirection
         self.windStrength = windStrength
 
-        super().live(vLimit)
+        super().live()
 
     def draw(self) -> None:
         self.demonstrate()
@@ -235,9 +236,8 @@ class Boid(Entity):
             gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self.lWingVector, self.rWingVector), self.demonstratePredatorColor)
             gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateBoidColor)
 
-
 class Predator(Entity):
-    def __init__(self, surface, qtreePredator, boids, radius) -> None:
+    def __init__(self, surface, qtreePredator, boids, radius, trackingStrength = 10, vLimit = 0) -> None:
         super().__init__(surface, pg.Vector2(0,0), radius)
         
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
@@ -252,12 +252,13 @@ class Predator(Entity):
         self.timeToNewTarget = uniform(3, 8)
         self.targetSwitchRange = 5
         self.color = "#000000"
-
-    def live(self, vLimit, trackingStrength = 10, windDirection = pg.Vector2(0, 0), windStrength = 0) -> None:
+        self.vLimit = vLimit
         self.trackingStrength = trackingStrength
+
+    def live(self, windDirection = pg.Vector2(0, 0), windStrength = 0) -> None:
         self.windDirection = windDirection
         self.windStrength = windStrength
-        super().live(vLimit)
+        super().live()
 
     def movement(self) -> None:
         if ((pg.Vector2(self.target.position)-pg.Vector2(self.position)).length() != 0):

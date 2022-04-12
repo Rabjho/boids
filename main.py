@@ -13,9 +13,9 @@ def main(size=(1280, 720), fullscreen=False):
     templates = {
         "default" : 
         {
-            "boids" : 250,
+            "boids" : 100,
             "boidSize" : 10,
-            "predators" : 0,
+            "predators" : 10,
             "predatorSize" : 12,
             "boidSpeedLimit" : 200,
             "boidSearchRadius" : 50,
@@ -30,7 +30,6 @@ def main(size=(1280, 720), fullscreen=False):
     }
 
     activeTemplate = templates["default"]
-
 
     palette = ["#31b5d1", "#ff2625", "#a9a9a9", "#6EB257", "#F3F719", "#ed651c", "#1978e5", "#b422bf", "#41c676"]
 
@@ -69,10 +68,10 @@ def main(size=(1280, 720), fullscreen=False):
     qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
     for i in range(activeTemplate["boids"]):
-        boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSize"]))
+        boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]))
 
     for i in range(activeTemplate["predators"]):
-        predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"]))
+        predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorTrackingStrength"], activeTemplate["predatorSpeedLimit"]))
 
     windArrow = WindPointer(screen, windPointerSize, windPointerWallMargin)
 
@@ -80,7 +79,6 @@ def main(size=(1280, 720), fullscreen=False):
     while True:
         clock.tick(60)
         screen.fill(backgroundColour)
-        print(clock.get_fps())
 
 
 # TODO Clean this code tremendously
@@ -142,7 +140,6 @@ def main(size=(1280, 720), fullscreen=False):
                 if (event.key == pg.K_RIGHT):
                     heldKeys["K_RIGHT"] = True
 
-
                 if (event.key > pg.K_0 and event.key <= pg.K_9):
                     for boid in boids:
                         boid.color = pg.Color(random.choice(palette[:event.key-48]))
@@ -170,11 +167,11 @@ def main(size=(1280, 720), fullscreen=False):
         qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
         for predator in predators:
-            predator.live(activeTemplate["predatorSpeedLimit"], activeTemplate["predatorTrackingStrength"], windDirection, windStrength * windToggle)
+            predator.live(windDirection, windStrength * windToggle)
             qtreePredator.insert(predator)
             
         for boid in boids:
-            boid.live(activeTemplate["boidSpeedLimit"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"], windDirection, windStrength * windToggle)
+            boid.live( windDirection, windStrength * windToggle)
             qtreeBoids.insert(boid)
 
         if (windToggle):
