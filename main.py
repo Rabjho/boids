@@ -2,7 +2,7 @@ import sys,pygame as pg
 from matplotlib.pyplot import close
 from entities import *
 import random
-from auxFunctions import State
+from auxfunctions import State
 from quadtree import Boundary, QuadTree
 
 def main(size=(1280, 720), fullscreen=False):

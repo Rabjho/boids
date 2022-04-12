@@ -2,7 +2,7 @@ from ctypes import alignment
 import sys,pygame as pg
 from pygame import gfxdraw
 from random import randrange, uniform, choice
-from auxFunctions import *
+from auxfunctions import *
 from quadtree import Boundary
 
 
