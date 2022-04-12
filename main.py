@@ -1,4 +1,7 @@
-from re import A
+# Removes pygame print in terminal on import
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+
 import sys,pygame as pg
 from entities import *
 import random
