@@ -45,3 +45,8 @@ class State:
         self.current += 1
         self.current %= self.modes
 
+
+    def prior(self):
+        self.current -= 1
+        if (self.current < 0):
+            self.current = self.modes - 1
