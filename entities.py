@@ -155,12 +155,14 @@ class Boid(Entity):
         self.alignmentStrength = alignmentStrength
         self.predatorAvoidStrength = predatorAvoidStrength
         self.predatorAwarenessFactor = predatorAwarenessFactor
+        self.vLimit = vLimit
         
 
-    def live(self, windDirection = pg.Vector2(0,0), windStrength = 0) -> None:
+    def live(self, windDirection = pg.Vector2(0,0), windStrength = 0, mouseTrackingStrength = 0) -> None:
 
         self.windDirection = windDirection
         self.windStrength = windStrength
+        self.mouseTracking = mouseTrackingStrength
 
         super().live()
 
@@ -183,6 +185,7 @@ class Boid(Entity):
         predatorsInRange = [predator for predator in self.predatorsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius * self.predatorAwarenessFactor * 2, self.searchRadius * self.predatorAwarenessFactor * 2)) if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1])]
 
         baseVelocity = pg.Vector2(0,0)
+
         if (len(boidsInRange) != 0):
             rule1 = pg.Vector2(0,0)
             rule2 = pg.Vector2(0,0)
@@ -221,7 +224,8 @@ class Boid(Entity):
             baseVelocity, 
             self.randomness(10), 
             self.avoidWalls(5 * self.walls), 
-            self.wind(self.windDirection, self.windStrength)
+            self.wind(self.windDirection, self.windStrength),
+            self.trackMouse()
         ]
 
         for effect in self.activeEffects:
@@ -230,15 +234,23 @@ class Boid(Entity):
         super().movement()
         self.bounceOfWalls()
      
+    def trackMouse(self) -> pg.Vector2:
+        if (not bool(self.mouseTracking)):
+            return pg.Vector2(0,0)
+        try:
+            return (pg.Vector2(pg.mouse.get_pos()) - self.position).normalize() * self.mouseTracking
+        except:
+            return pg.Vector2(0,0)
 
     def demonstrate(self) -> None:
         if (self.demonstrating):
             gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self.lWingVector, self.rWingVector), self.demonstratePredatorColor)
             gfxdraw.filled_polygon(self.surface, drawPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateBoidColor)
 
+
 class Predator(Entity):
-    def __init__(self, surface, qtreePredator, boids, radius, trackingStrength = 10, vLimit = 0) -> None:
-        super().__init__(surface, pg.Vector2(0,0), radius)
+    def __init__(self, surface, qtreePredator, boids, radius, vLimit = 0) -> None:
+        super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
         
         self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
@@ -252,8 +264,7 @@ class Predator(Entity):
         self.timeToNewTarget = uniform(3, 8)
         self.targetSwitchRange = 5
         self.color = "#000000"
-        self.vLimit = vLimit
-        self.trackingStrength = trackingStrength
+
 
     def live(self, windDirection = pg.Vector2(0, 0), windStrength = 0) -> None:
         self.windDirection = windDirection
@@ -261,10 +272,11 @@ class Predator(Entity):
         super().live()
 
     def movement(self) -> None:
+        self.baseTracking = pg.Vector2(0,0)
         if ((pg.Vector2(self.target.position)-pg.Vector2(self.position)).length() != 0):
-            self.baseTracking = (pg.Vector2(self.target.position)-pg.Vector2(self.position)).normalize() * self.trackingStrength
+            self.baseTracking = (pg.Vector2(self.target.position)-pg.Vector2(self.position)).normalize() * self.vLimit
         else:
-            self.baseTracking = pg.Vector2
+            self.baseTracking = pg.Vector2(0,0)
         
         self.activeEffects = [
             self.baseTracking, 

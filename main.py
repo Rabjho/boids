@@ -22,10 +22,10 @@ def main(size=(1280, 720), fullscreen=False):
             "cohesionStrength" : 3,
             "seperationStrength" : 15,
             "alignmentStrength" : 7.5,
+            "mouseTrackingStrength" : 5,
             "predatorAvoidStrength" : 20,
             "predatorAwarenessFactor" : 2,
             "predatorSpeedLimit" : 150,
-            "predatorTrackingStrength" : 10
         }
     }
 
@@ -71,7 +71,7 @@ def main(size=(1280, 720), fullscreen=False):
         boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]))
 
     for i in range(activeTemplate["predators"]):
-        predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorTrackingStrength"], activeTemplate["predatorSpeedLimit"]))
+        predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorSpeedLimit"]))
 
     windArrow = WindPointer(screen, windPointerSize, windPointerWallMargin)
 
@@ -148,8 +148,7 @@ def main(size=(1280, 720), fullscreen=False):
                     for boid in boids:
                         if (not boid.demonstrating):
                             boid.trailing = not boid.trailing
-
-                    
+         
             elif (event.type == pg.KEYUP):
                 if (event.key == pg.K_LEFT):
                     heldKeys["K_LEFT"] = False
@@ -171,7 +170,7 @@ def main(size=(1280, 720), fullscreen=False):
             qtreePredator.insert(predator)
             
         for boid in boids:
-            boid.live( windDirection, windStrength * windToggle)
+            boid.live(windDirection, windStrength * windToggle, activeTemplate["mouseTrackingStrength"] * pg.mouse.get_pressed()[0])
             qtreeBoids.insert(boid)
 
         if (windToggle):
