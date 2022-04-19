@@ -25,26 +25,45 @@ def main(size=(1280, 720), fullscreen=False):
             "cohesionStrength" : 3,
             "seperationStrength" : 15,
             "alignmentStrength" : 7.5,
+            "wallAvoid" : 5,
             "mouseTrackingStrength" : 5,
             "predatorAvoidStrength" : 20,
             "predatorAwarenessFactor" : 2,
-            "predatorSpeedLimit" : 150,
+            "predatorSpeedLimit" : 75,
         },
-        "speed" : 
+        "speedy" : 
         {
-            "boids" : 10,
+            "boids" : 100,
             "boidSize" : 10,
-            "predators" : 5,
+            "predators" : 0,
             "predatorSize" : 12,
-            "boidSpeedLimit" : 2000,
-            "boidSearchRadius" : 50,
-            "cohesionStrength" : 15,
-            "seperationStrength" : 30,
-            "alignmentStrength" : 25,
+            "boidSpeedLimit" : 400,
+            "boidSearchRadius" : 120,
+            "cohesionStrength" : 7,
+            "seperationStrength" : 33,
+            "alignmentStrength" : 15,
+            "wallAvoid" : 15,
             "mouseTrackingStrength" : 5,
-            "predatorAvoidStrength" : 200,
+            "predatorAvoidStrength" : 20,
             "predatorAwarenessFactor" : 2,
-            "predatorSpeedLimit" : 150,
+            "predatorSpeedLimit" : 75,
+        },
+        "largeTurtles" : 
+        {
+            "boids" : 50,
+            "boidSize" : 30,
+            "predators" : 1,
+            "predatorSize" : 12,
+            "boidSpeedLimit" : 200,
+            "boidSearchRadius" : 100,
+            "cohesionStrength" : 3,
+            "seperationStrength" : 15,
+            "alignmentStrength" : 17.5,
+            "wallAvoid" : 10,
+            "mouseTrackingStrength" : 5,
+            "predatorAvoidStrength" : 25,
+            "predatorAwarenessFactor" : 1,
+            "predatorSpeedLimit" : 75,
         }
     }
     
@@ -228,7 +247,7 @@ def main(size=(1280, 720), fullscreen=False):
             qtreePredator.insert(predator)
             
         for boid in boids:
-            boid.live(windDirection, windStrength * windToggle, activeTemplate["mouseTrackingStrength"] * pg.mouse.get_pressed()[0])
+            boid.live(windDirection, windStrength * windToggle, activeTemplate["wallAvoid"] ,activeTemplate["mouseTrackingStrength"] * pg.mouse.get_pressed()[0])
             qtreeBoids.insert(boid)
 
         if (windToggle):

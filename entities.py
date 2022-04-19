@@ -158,10 +158,11 @@ class Boid(Entity):
         self.vLimit = vLimit
         
 
-    def live(self, windDirection = pg.Vector2(0,0), windStrength = 0, mouseTrackingStrength = 0) -> None:
+    def live(self, windDirection = pg.Vector2(0,0), windStrength = 0, wallAvoid = 5, mouseTrackingStrength = 0) -> None:
 
         self.windDirection = windDirection
         self.windStrength = windStrength
+        self.wallAvoid = wallAvoid
         self.mouseTracking = mouseTrackingStrength
 
         super().live()
@@ -222,8 +223,8 @@ class Boid(Entity):
         # self.velocity = baseVelocity
         self.activeEffects = [
             baseVelocity, 
-            self.randomness(10), 
-            self.avoidWalls(5 * self.walls), 
+            self.randomness(5), 
+            self.avoidWalls(self.wallAvoid * self.walls), 
             self.wind(self.windDirection, self.windStrength),
             self.trackMouse()
         ]
