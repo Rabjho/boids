@@ -67,11 +67,8 @@ def main(size=(1280, 720), fullscreen=False):
     qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
     # Creates list of boids/predators according to how many are set as default w/ values according to the same template
-    for i in range(activeTemplate["boids"]):
-        boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]))
-
-    for i in range(activeTemplate["predators"]):
-        predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorSpeedLimit"]))
+    boids = [Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]) for i in range(activeTemplate["boids"])]
+    predators = [Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorSpeedLimit"]) for i in range(activeTemplate["predators"])]
 
     # Initializes the windpointer
     windArrow = WindPointer(screen, windPointerSize, windPointerWallMargin)
