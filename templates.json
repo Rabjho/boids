@@ -1,0 +1,53 @@
+{
+    "default": {
+        "boids": 100,
+        "boidSize": 10,
+        "predators": 10,
+        "predatorSize": 12,
+        "boidSpeedLimit": 200,
+        "boidSearchRadius": 50,
+        "cohesionStrength": 3,
+        "seperationStrength": 15,
+        "alignmentStrength": 7.5,
+        "wallAvoid": 5,
+        "mouseTrackingStrength": 5,
+        "windStrength": 5,
+        "predatorAvoidStrength": 20,
+        "predatorAwarenessFactor": 2,
+        "predatorSpeedLimit": 75
+    },
+    "speedy": {
+        "boids": 100,
+        "boidSize": 10,
+        "predators": 0,
+        "predatorSize": 12,
+        "boidSpeedLimit": 400,
+        "boidSearchRadius": 120,
+        "cohesionStrength": 7,
+        "seperationStrength": 33,
+        "alignmentStrength": 15,
+        "wallAvoid": 15,
+        "mouseTrackingStrength": 5,
+        "windStrength": 5,
+        "predatorAvoidStrength": 20,
+        "predatorAwarenessFactor": 2,
+        "predatorSpeedLimit": 75
+    },
+    "largeTurtles": {
+        "boids": 50,
+        "boidSize": 30,
+        "predators": 1,
+        "predatorSize": 12,
+        "boidSpeedLimit": 200,
+        "boidSearchRadius": 100,
+        "cohesionStrength": 3,
+        "seperationStrength": 15,
+        "alignmentStrength": 17.5,
+        "wallAvoid": 10,
+        "mouseTrackingStrength": 5,
+        "windStrength": 5,
+        "predatorAvoidStrength": 25,
+        "predatorAwarenessFactor": 1,
+        "predatorSpeedLimit": 75
+    }
+}
