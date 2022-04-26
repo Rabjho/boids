@@ -29,6 +29,6 @@ A random amount of boids act as if they are in wall mode while others are in noc
 
 
 ## Links
-[Pygame docs](https://www.pygame.org/docs/)
-[Boids](https://en.wikipedia.org/wiki/Boids)
+[Pygame docs](https://www.pygame.org/docs/)  
+[Boids](https://en.wikipedia.org/wiki/Boids)  
 [Quadtree](https://en.wikipedia.org/wiki/Quadtree)
