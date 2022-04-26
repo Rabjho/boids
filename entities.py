@@ -256,10 +256,10 @@ class Boid(Entity):
             if (rule3.length() != 0):
                 baseVelocity += pg.Vector2((rule3 / len(boidsInRange))).normalize() * self.alignmentStrength
 
-        # Resets predatorAvoidance vector
-        predatorAvoidance = pg.Vector2(0,0)
         # Ensures that there are predators in range
         if (len(predatorsInRange) != 0):
+            # Resets predatorAvoidance vector
+            predatorAvoidance = pg.Vector2(0,0)
             # Iterates through predators in range and finds their position
             for predator in predatorsInRange:
                 predatorAvoidance += predator.position
