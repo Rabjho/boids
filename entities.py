@@ -64,7 +64,7 @@ class Entity:
         gfxdraw.filled_polygon(self.surface, self.points, pg.Color(self.color))
 
         # Removes old points in the trail
-        if (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
+        while (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
             self.trailPoints.pop(0)
         
         # Adds the new points in the trail
