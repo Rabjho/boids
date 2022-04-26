@@ -1,5 +1,4 @@
 # Defines a boundary class that can check whether an object is within its boundaries or whether another boundary intersects it
-from xmlrpc.client import Boolean
 
 
 class Boundary():
