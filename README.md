@@ -10,6 +10,11 @@ Boids implementation w/ ability to make templates. Done using quadtrees in pygam
 |f|Toggles fullscreen|
 |ALT+ENTER|Toggles fullscreen|
 |0-9|Changes amount of families|
+|q|Chooses prior template|
+|e|Chooses next template|
+|w|Toggles wind|
+|Arrow left/right|Changes wind direction|
+|t|Toggles trails|
 
 ## Modes 
 ### Wall (default) 
@@ -24,3 +29,5 @@ A random amount of boids act as if they are in wall mode while others are in noc
 
 ## Links
 [Pygame docs](https://www.pygame.org/docs/)
+[Boids](https://en.wikipedia.org/wiki/Boids)
+[Quadtree](https://en.wikipedia.org/wiki/Quadtree)
