@@ -15,6 +15,7 @@ Boids implementation w/ ability to make templates. Done using quadtrees in pygam
 |w|Toggles wind|
 |Arrow left/right|Changes wind direction|
 |t|Toggles trails|
+|Left mousebutton|Makes boids attracted to the mouse|
 
 ## Modes 
 ### Wall (default) 
