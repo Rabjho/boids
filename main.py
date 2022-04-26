@@ -13,10 +13,12 @@ import json
 # main function running the program, called in the bottom if-statement
 # Has default arguments to run the first time and afterwards those arguments are supplied when the game is reset
 def main(size=(1280, 720), fullscreen=False):
+
+
     pg.init()
 
     # Loading templates from templates.json using 'with' to ensure proper exiting of file
-    with open("templates.json", "r") as file:
+    with open(__file__+r"\\..\\"+"templates.json", "r") as file:
         templates = json.load(file)
 
     # Template handling with a basic state machine
