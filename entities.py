@@ -9,7 +9,7 @@ from quadtree import Boundary
 class Entity:
     # Constructor which initializes variables, some of which have hardcoded default values
     def __init__(self, surface, position, radius, vLimit = 0, rotation=pg.Vector2(0,1), antiAliasing = True) -> None:
-        self.surface = surface
+        self._surface = surface
         self.position = position
         self.radius = radius
         self.rotation = rotation
@@ -21,7 +21,7 @@ class Entity:
         self.walls = True # Could be added to arguments that can be controlled w/ default
 
         self.velocity = pg.Vector2(0,0)
-        self.clock = pg.time.Clock()
+        self._clock = pg.time.Clock()
 
         # Trail handling
         self.trailing = False
@@ -37,31 +37,31 @@ class Entity:
     # Live function that is run each frame in main file
     def live(self) -> None:
         # Ticks internal clock
-        self.clock.tick()
-        self.deltaTime = self.clock.get_time() / 1000
+        self._clock.tick()
+        self._deltaTime = self._clock.get_time() / 1000
 
         # Defines the angle of the "wings"
-        self.rWingVector = self.rotation.rotate(self.angle)
-        self.lWingVector = self.rotation.rotate(-self.angle)
+        self._rWingVector = self.rotation.rotate(self.angle)
+        self._lWingVector = self.rotation.rotate(-self.angle)
 
         # Calls movement handler
-        self.movement()
+        self._movement()
         # Calls rendering handler
-        self.draw()
+        self._draw()
 
     # Rendering handler
-    def draw(self) -> None:
+    def _draw(self) -> None:
         # Points in each object as a list of x and y coordinates
-        self.tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
+        self._tip = [self.position.x + self.rotation.x * self.radius, self.position.y + self.rotation.y * self.radius]
 
-        self.rWingTip = [self.position.x + self.rWingVector.x * (self.radius / 2), self.position.y + self.rWingVector.y * (self.radius / 2)]
-        self.lWingTip = [self.position.x + self.lWingVector.x * (self.radius / 2), self.position.y + self.lWingVector.y * (self.radius / 2)]
-        self.points = [self.tip, self.rWingTip, self.position, self.lWingTip]
+        self._rWingTip = [self.position.x + self._rWingVector.x * (self.radius / 2), self.position.y + self._rWingVector.y * (self.radius / 2)]
+        self._lWingTip = [self.position.x + self._lWingVector.x * (self.radius / 2), self.position.y + self._lWingVector.y * (self.radius / 2)]
+        self._points = [self._tip, self._rWingTip, self.position, self._lWingTip]
 
         # Layering different renders to attain toggleable anti-aliasing
         if (self.antiAliasing):
-            gfxdraw.aapolygon(self.surface, self.points, pg.Color(self.color))
-        gfxdraw.filled_polygon(self.surface, self.points, pg.Color(self.color))
+            gfxdraw.aapolygon(self._surface, self._points, pg.Color(self.color))
+        gfxdraw.filled_polygon(self._surface, self._points, pg.Color(self.color))
 
         # Removes old points in the trail
         while (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
@@ -71,9 +71,9 @@ class Entity:
         self.trailPoints.append((self.position, pg.time.get_ticks()))
 
     # Movement handler
-    def movement(self) -> None:
+    def _movement(self) -> None:
         # Updates position according to velocity
-        self.position = self.position + self.velocity * self.deltaTime   
+        self.position = self.position + self.velocity * self._deltaTime   
 
         # Ensures movement speed is below threshold
         if (self.velocity.length() >= self.vLimit and self.vLimit != 0):     
@@ -86,10 +86,10 @@ class Entity:
     # Movement script to both fly through walls (ie. the screen) and to bounce of them if that is turned on.
     # It checks what edge of the screen has been flown over/through and acts accordingly by teleporting to opposite side or
     # reversing velocity and keeping within screen
-    def bounceOfWalls(self) -> None:
-        if (self.position.x > self.surface.get_width()):
+    def _bounceOfWalls(self) -> None:
+        if (self.position.x > self._surface.get_width()):
             if (self.walls):
-                self.position.x = self.surface.get_width()
+                self.position.x = self._surface.get_width()
                 self.velocity.x *= -1
             else:
                 self.position.x = 0
@@ -99,12 +99,12 @@ class Entity:
                 self.position.x = 0
                 self.velocity.x *= -1
             else:
-                self.position.x = self.surface.get_width()
+                self.position.x = self._surface.get_width()
             
 
-        if (self.position.y > self.surface.get_height()):
+        if (self.position.y > self._surface.get_height()):
             if (self.walls):
-                self.position.y = self.surface.get_height()
+                self.position.y = self._surface.get_height()
                 self.velocity.y *= -1
             else:
                 self.position.y = 0
@@ -114,17 +114,17 @@ class Entity:
                 self.position.y = 0
                 self.velocity.y *= -1
             else:
-                self.position.y = self.surface.get_height()
+                self.position.y = self._surface.get_height()
 
     # Small random movement script, which makes everything feel more organic
-    def randomness(self, strength=0) -> pg.Vector2:
+    def _randomness(self, strength=0) -> pg.Vector2:
         return pg.Vector2(uniform(-1,1), uniform(-1,1)).normalize() * strength
 
     # Handler for avoiding walls in a way that resembles the entities seeing them.
     # Note that it is not directly simulated but merely and forcefully attempted to make the simulation nicer
-    def avoidWalls(self, strength=0) -> pg.Vector2:
-        xBoundries = (self.wallMargin, self.surface.get_width() - self.wallMargin)
-        yBoundries = (self.wallMargin, self.surface.get_height() - self.wallMargin)
+    def _avoidWalls(self, strength=0) -> pg.Vector2:
+        xBoundries = (self.wallMargin, self._surface.get_width() - self.wallMargin)
+        yBoundries = (self.wallMargin, self._surface.get_height() - self.wallMargin)
         avoidanceVector = pg.Vector2(0,0)
 
         if (self.position.x < xBoundries[0]):
@@ -143,7 +143,7 @@ class Entity:
         return avoidanceVector
 
     # Wind effect that takes a direction and a speed and returns that vector
-    def wind(self, direction = pg.Vector2(0,0), strength=0) -> pg.Vector2:
+    def _wind(self, direction = pg.Vector2(0,0), strength=0) -> pg.Vector2:
         try:
             return direction.normalize() * strength
         except:
@@ -154,7 +154,7 @@ class Entity:
     def drawTrail(self) -> None:
         if (self.trailing or self.demonstrating):
             try:
-                gfxdraw.aapolygon(self.surface, (list(zip(*self.trailPoints))[0][::1]+list(zip(*self.trailPoints))[0][::-1])[::5], self.trailColor)
+                gfxdraw.aapolygon(self._surface, (list(zip(*self.trailPoints))[0][::1]+list(zip(*self.trailPoints))[0][::-1])[::5], self.trailColor)
             except:
                 pass
 
@@ -166,13 +166,13 @@ class Boid(Entity):
         super().__init__(surface, pg.Vector2(0,0), radius)
 
         # Places boid at random location with random rotation
-        self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
+        self.position = pg.Vector2(randrange(self._surface.get_width()), randrange(self._surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
 
         # Internalizes the top most quadtree and inserts itself into it
-        self.boidsQuadTree = boidsQuadTree
-        self.boidsQuadTree.insert(self)
-        self.predatorsQuadTree = predatorQuadTree
+        self._boidsQuadTree = boidsQuadTree
+        self._boidsQuadTree.insert(self)
+        self._predatorsQuadTree = predatorQuadTree
 
         # Default demonstration config
         self.demonstrating = False
@@ -191,25 +191,25 @@ class Boid(Entity):
     # Modifies live method of parent
     def live(self, windDirection = pg.Vector2(0,0), windStrength = 0, wallAvoid = 5, mouseTrackingStrength = 0) -> None:
         # Takes arguments that should be updated each frame and neatly updates internally
-        self.windDirection = windDirection
-        self.windStrength = windStrength
-        self.wallAvoid = wallAvoid
-        self.mouseTracking = mouseTrackingStrength
+        self._windDirection = windDirection
+        self._windStrength = windStrength
+        self._wallAvoid = wallAvoid
+        self._mouseTracking = mouseTrackingStrength
 
         # Calls parent live method
         super().live()
 
     # Modifies draw method of parent
-    def draw(self) -> None:
+    def _draw(self) -> None:
         # Enables demonstration and trail drawing
-        self.demonstrate()
+        self._demonstrate()
         self.drawTrail()
 
         # Calls parent draw method
-        super().draw()
+        super()._draw()
 
 
-    def movement(self) -> None:
+    def _movement(self) -> None:
     # START This is the O(n^2) check for boids and predators in range that checks all boids
         # self.boids = boids
         # self.enemies = predators
@@ -222,10 +222,10 @@ class Boid(Entity):
     # This is the O(n*log(n)) check for boids in range using quadtree
         # Queries the quadtree and finds boids in that area and for each checks whether it is visible from this boids perspective
         # makes boidsInRange a list of tuples with the visible boid and whether it is in this boids family (i.e. if they're the same colour)
-        boidsInRange = [(boid, boid.color == self.color) for boid in self.boidsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius * 2, self.searchRadius * 2)) if inPie(boid.position, self.position, self.searchRadius, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1]) and boid.position != self.position]
+        boidsInRange = [(boid, boid.color == self.color) for boid in self._boidsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius * 2, self.searchRadius * 2)) if inPie(boid.position, self.position, self.searchRadius, self._lWingVector.as_polar()[1], self._rWingVector.as_polar()[1]) and boid.position != self.position]
 
         # Does almost the same as boids except for the family check
-        predatorsInRange = [predator for predator in self.predatorsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius * self.predatorAwarenessFactor * 2, self.searchRadius * self.predatorAwarenessFactor * 2)) if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self.lWingVector.as_polar()[1], self.rWingVector.as_polar()[1])]
+        predatorsInRange = [predator for predator in self._predatorsQuadTree.query(Boundary(self.position.x, self.position.y, self.searchRadius * self.predatorAwarenessFactor * 2, self.searchRadius * self.predatorAwarenessFactor * 2)) if inPie(predator.position, self.position, self.searchRadius * self.predatorAwarenessFactor, self._lWingVector.as_polar()[1], self._rWingVector.as_polar()[1])]
 
         # Resets base velocity
         baseVelocity = pg.Vector2(0,0)
@@ -272,10 +272,10 @@ class Boid(Entity):
         # List of active movement effects for ease 
         self.activeEffects = [
             baseVelocity, 
-            self.randomness(5), 
-            self.avoidWalls(self.wallAvoid * self.walls), 
-            self.wind(self.windDirection, self.windStrength),
-            self.trackMouse()
+            self._randomness(5), 
+            self._avoidWalls(self._wallAvoid * self.walls), 
+            self._wind(self._windDirection, self._windStrength),
+            self._trackMouse()
         ]
 
         # Applies each effect
@@ -283,32 +283,32 @@ class Boid(Entity):
             self.velocity += effect
 
         # Calls parent movement method
-        super().movement()
+        super()._movement()
 
         # Ensures we're within the screen after position update
-        self.bounceOfWalls()
+        self._bounceOfWalls()
      
     # Defines a tracking function of the mouse
-    def trackMouse(self) -> pg.Vector2:
+    def _trackMouse(self) -> pg.Vector2:
         # Checks whether we should track the mouse
-        if (not bool(self.mouseTracking)):
+        if (not bool(self._mouseTracking)):
             return pg.Vector2(0,0)
 
         # Attempts to return the vector towards the mouse, however that could be right on top of the boid
         # In that case it returns a zero vector
         try:
-            return (pg.Vector2(pg.mouse.get_pos()) - self.position).normalize() * self.mouseTracking
+            return (pg.Vector2(pg.mouse.get_pos()) - self.position).normalize() * self._mouseTracking
         except:
             return pg.Vector2(0,0)
 
     # Defines demonstration drawing function 
-    def demonstrate(self) -> None:
+    def _demonstrate(self) -> None:
         # Checks whether we should be demonstrating
         if (self.demonstrating):
             # Draws boid search radius
-            gfxdraw.filled_polygon(self.surface, pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self.lWingVector, self.rWingVector), self.demonstratePredatorColor)
+            gfxdraw.filled_polygon(self._surface, pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self._lWingVector, self._rWingVector), self.demonstratePredatorColor)
             # Draws predator search radius
-            gfxdraw.filled_polygon(self.surface, pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self.lWingVector, self.rWingVector), self.demonstrateBoidColor)
+            gfxdraw.filled_polygon(self._surface, pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self._lWingVector, self._rWingVector), self.demonstrateBoidColor)
 
 # Predator class which inherits Enitity
 class Predator(Entity):
@@ -318,53 +318,53 @@ class Predator(Entity):
         super().__init__(surface, pg.Vector2(0,0), radius, vLimit)
         
         # Places boid at random location with random rotation
-        self.position = pg.Vector2(randrange(self.surface.get_width()), randrange(self.surface.get_height()))
+        self.position = pg.Vector2(randrange(self._surface.get_width()), randrange(self._surface.get_height()))
         self.rotation = pg.Vector2(uniform(-1,1),uniform(-1,1)).normalize()
 
         # Takes a list of boids and chooses a target
         self.boids = boids
-        self.target = choice(self.boids) 
+        self._target = choice(self.boids) 
 
         # Sets cooldown to time at initialization
-        self.cooldownTargetChange = pg.time.get_ticks()
+        self._cooldownTargetChange = pg.time.get_ticks()
 
         # Internalizes the top most quadtree and inserts itself into it
-        self.qtreePredator = qtreePredator
-        self.qtreePredator.insert(self)
+        self._qtreePredator = qtreePredator
+        self._qtreePredator.insert(self)
 
         # Chooses the cooldown of this predator to retarget 
-        self.timeToNewTarget = uniform(3, 8)
+        self._timeToNewTarget = uniform(3, 8)
 
         # Creates variable that controls the range, where within that the predator should also change target
-        self.targetSwitchRange = 5
+        self._targetSwitchRange = 5
 
         self.color = "#000000"
 
     # Modifies live method of parent
     def live(self, windDirection = pg.Vector2(0, 0), windStrength = 0) -> None:
         # Takes arguments that should be updated each frame and neatly updates internally
-        self.windDirection = windDirection
-        self.windStrength = windStrength
+        self._windDirection = windDirection
+        self._windStrength = windStrength
 
         # Calls parent live method
         super().live()
 
     # Modifies movement method of parent
-    def movement(self) -> None:
+    def _movement(self) -> None:
         # Resets baseTracking vector
-        self.baseTracking = pg.Vector2(0,0)
+        baseTracking = pg.Vector2(0,0)
 
         # Finds vector to the chosen target and ensures that it isn't of length 0
-        if ((pg.Vector2(self.target.position)-pg.Vector2(self.position)).length() != 0):
-            self.baseTracking = (self.target.position-self.position).normalize() * self.vLimit
+        if ((pg.Vector2(self._target.position)-pg.Vector2(self.position)).length() != 0):
+            baseTracking = (self._target.position-self.position).normalize() * self.vLimit
         else:
-            self.baseTracking = pg.Vector2(0,0)
+            baseTracking = pg.Vector2(0,0)
         
         # List of active movement effects
         self.activeEffects = [
-            self.baseTracking, 
-            self.avoidWalls(5 * self.walls), 
-            self.wind(self.windDirection, self.windStrength)
+            baseTracking, 
+            self._avoidWalls(5 * self.walls), 
+            self._wind(self._windDirection, self._windStrength)
         ]
 
         # Iterates through active effects and applies them
@@ -372,17 +372,17 @@ class Predator(Entity):
             self.velocity += effect
 
         # Changes target if it has been too long since last change or the target is within range
-        if (pg.time.get_ticks() - self.cooldownTargetChange > self.timeToNewTarget * 1000 or pg.Vector2(self.position).distance_to(pg.Vector2(self.target.position)) < self.targetSwitchRange):
-            self.target = choice(self.boids)
+        if (pg.time.get_ticks() - self._cooldownTargetChange > self._timeToNewTarget * 1000 or pg.Vector2(self.position).distance_to(pg.Vector2(self._target.position)) < self._targetSwitchRange):
+            self._target = choice(self.boids)
 
             # Resets cooldown
-            self.cooldownTargetChange = pg.time.get_ticks()
+            self._cooldownTargetChange = pg.time.get_ticks()
 
         # Calls parent movement method
-        super().movement()    
+        super()._movement()    
 
         # Ensures the predator is within the screen after movement update
-        self.bounceOfWalls()
+        self._bounceOfWalls()
 
 # WindPointer class (i.e. the point in the bottom left that shows the wind's direction)
 # This could be done as a one off, but the entity class was able to easily draw an arrow/pointer
@@ -404,7 +404,7 @@ class WindPointer(Entity):
         self.rotation = windDirection.normalize()
 
         # Ensures that the position stays relative when the window changes 
-        self.position = pg.Vector2(self.margin, self.surface.get_height()-self.margin)
+        self.position = pg.Vector2(self.margin, self._surface.get_height()-self.margin)
 
         # Calls parent live method
         super().live()
