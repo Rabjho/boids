@@ -248,13 +248,13 @@ class Boid(Entity):
 
             # Assures that the rules aren't vectors of length 0 and adds them to baseVelocity (i.e. the aforementioned basic rules)
             if (rule1.length() != 0):
-                baseVelocity += pg.Vector2((rule1 / len(boidsInRange) - self.position)).normalize() * self.cohesionStrength
+                baseVelocity += (rule1 / len(boidsInRange) - self.position).normalize() * self.cohesionStrength
 
             if (rule2.length() != 0):
                 baseVelocity += rule2.normalize() * self.seperationStrength
 
             if (rule3.length() != 0):
-                baseVelocity += pg.Vector2((rule3 / len(boidsInRange))).normalize() * self.alignmentStrength
+                baseVelocity += (rule3 / len(boidsInRange)).normalize() * self.alignmentStrength
 
         # Ensures that there are predators in range
         if (len(predatorsInRange) != 0):
