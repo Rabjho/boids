@@ -43,6 +43,7 @@ def pointsInPie(pieCenter, r, startVector, endVector) -> list:
 
 
 # Creates a simple state machine that can loop easily through mod (%)
+# Note: Should have been made with as a generator function
 class State:
     # Initializes the state machine with a given number of modes (a ka the maximum number of states)
     def __init__(self, modes) -> None:
