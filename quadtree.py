@@ -35,7 +35,7 @@ class Quadtree():
         self.capacity = capacity
 
         # Creates a list of objects within this boundary
-        self.objects = []
+        self._objects = []
 
         # Creates a boolean that ensures proper splitting
         self._divided = False
@@ -49,8 +49,8 @@ class Quadtree():
         
         # Checks if the quadtree can hold more objects, otherwise subdivide if it isn't already.
         # If it is subdivided call the insert funtion of each quadtree
-        if (len(self.objects) < self.capacity):
-            self.objects.append(object)
+        if (len(self._objects) < self.capacity):
+            self._objects.append(object)
             return True
         else:
             if (not self._divided):
@@ -77,7 +77,7 @@ class Quadtree():
 
         else:
             # Adds objects of this quadtree
-            for object in self.objects:
+            for object in self._objects:
                 if (range.contains(object)):
                     foundObjects.append(object)
 
