@@ -21,7 +21,7 @@ class Entity:
         self.walls = True # Could be added to arguments that can be controlled w/ default
 
         self.velocity = pg.Vector2(0,0)
-        self._clock = pg.time.Clock()
+        self.__clock = pg.time.Clock()
 
         # Trail handling
         self.trailing = False
@@ -37,8 +37,8 @@ class Entity:
     # Live function that is run each frame in main file
     def live(self) -> None:
         # Ticks internal clock
-        self._clock.tick()
-        self._deltaTime = self._clock.get_time() / 1000
+        self.__clock.tick()
+        self._deltaTime = self.__clock.get_time() / 1000
 
         # Defines the angle of the "wings"
         self._rWingVector = self.rotation.rotate(self.angle)
