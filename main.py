@@ -18,7 +18,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
     pg.init()
 
     # Loading templates from templates.json using 'with' to ensure proper exiting of file
-    with open(__file__+r"\\..\\"+"templates.json", "r") as file:
+    with open(os.path.dirname(__file__)+"/templates.json", "r") as file:
         templates = json.load(file)
 
     # Template handling with a basic state machine
