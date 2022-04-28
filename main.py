@@ -12,7 +12,7 @@ import json
 
 # main function running the program, called in the bottom if-statement
 # Has default arguments to run the first time and afterwards those arguments are supplied when the game is reset
-def main(size=(1280, 720), fullscreen=False):
+def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
 
     pg.init()
@@ -22,7 +22,7 @@ def main(size=(1280, 720), fullscreen=False):
         templates = json.load(file)
 
     # Template handling with a basic state machine
-    activeTemplate = templates["default"]
+    activeTemplate = templates[resetTemplate]
     templateController = State(len(templates))
 
     # The colour palette of the background and boids
@@ -94,7 +94,7 @@ def main(size=(1280, 720), fullscreen=False):
             elif (event.type == pg.KEYDOWN):
                 # Reset
                 if (event.key == pg.K_r):
-                    main(screen.get_size(), fullscreen)
+                    main(screen.get_size(), fullscreen, list(templates)[templateController.current])
                 
                 # Fullscreen toggle
                 if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
