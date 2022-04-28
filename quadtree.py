@@ -28,10 +28,10 @@ class Boundary():
         )
 
 # Defines the quadtree object
-class QuadTree():
+class Quadtree():
     # Defines inizialisation function that takes a boundary and a capacity of each boundary
     def __init__(self, boundary, capacity) -> None:
-        self._boundary = boundary
+        self.__boundary = boundary
         self.capacity = capacity
 
         # Creates a list of objects within this boundary
@@ -44,7 +44,7 @@ class QuadTree():
     # Also returns true if it is succesfull and false if not
     def insert(self, object) -> bool:
         # Checks if the object can be inserted into the current quadtree
-        if (not self._boundary.contains(object)):
+        if (not self.__boundary.contains(object)):
             return False
         
         # Checks if the quadtree can hold more objects, otherwise subdivide if it isn't already.
@@ -54,25 +54,25 @@ class QuadTree():
             return True
         else:
             if (not self._divided):
-                self._subdivide()
-            elif (self._northwest.insert(object)): return True
-            elif (self._northeast.insert(object)): return True
-            elif (self._southwest.insert(object)): return True
-            elif (self._southeast.insert(object)): return True
+                self.__subdivide()
+            elif (self.__northwest.insert(object)): return True
+            elif (self.__northeast.insert(object)): return True
+            elif (self.__southwest.insert(object)): return True
+            elif (self.__southeast.insert(object)): return True
 
     # Defines subdividing function that creates 4 quadtrees recursively until satisfactory. Also flags this quadtree as divided
-    def _subdivide(self):
-        self._northwest = QuadTree(Boundary(self._boundary.x - self._boundary.w / 2, self._boundary.y - self._boundary.h / 2, self._boundary.w / 2, self._boundary.h / 2), self.capacity)
-        self._northeast = QuadTree(Boundary(self._boundary.x + self._boundary.w / 2, self._boundary.y - self._boundary.h / 2, self._boundary.w / 2, self._boundary.h / 2), self.capacity)
-        self._southwest = QuadTree(Boundary(self._boundary.x - self._boundary.w / 2, self._boundary.y + self._boundary.h / 2, self._boundary.w / 2, self._boundary.h / 2), self.capacity)
-        self._southeast = QuadTree(Boundary(self._boundary.x + self._boundary.w / 2, self._boundary.y + self._boundary.h / 2, self._boundary.w / 2, self._boundary.h / 2), self.capacity)
+    def __subdivide(self):
+        self.__northwest = Quadtree(Boundary(self.__boundary.x - self.__boundary.w / 2, self.__boundary.y - self.__boundary.h / 2, self.__boundary.w / 2, self.__boundary.h / 2), self.capacity)
+        self.__northeast = Quadtree(Boundary(self.__boundary.x + self.__boundary.w / 2, self.__boundary.y - self.__boundary.h / 2, self.__boundary.w / 2, self.__boundary.h / 2), self.capacity)
+        self.__southwest = Quadtree(Boundary(self.__boundary.x - self.__boundary.w / 2, self.__boundary.y + self.__boundary.h / 2, self.__boundary.w / 2, self.__boundary.h / 2), self.capacity)
+        self.__southeast = Quadtree(Boundary(self.__boundary.x + self.__boundary.w / 2, self.__boundary.y + self.__boundary.h / 2, self.__boundary.w / 2, self.__boundary.h / 2), self.capacity)
         self._divided = True
 
     # Defines the query function which recursively queries the quadtree for objects
     def query(self, range):
         # Starts the recursive query by making a new empty list and checking if it is intersected
         foundObjects = []
-        if (not self._boundary.intersects(range)): 
+        if (not self.__boundary.intersects(range)): 
             return foundObjects
 
         else:
@@ -84,10 +84,10 @@ class QuadTree():
             # Recursively queries quadtrees beneath this one which then return their contained objects.
             # These are then added to this ones list
             if (self._divided):
-                foundObjects.extend(self._northwest.query(range))
-                foundObjects.extend(self._northeast.query(range))
-                foundObjects.extend(self._southwest.query(range))
-                foundObjects.extend(self._southeast.query(range))
+                foundObjects.extend(self.__northwest.query(range))
+                foundObjects.extend(self.__northeast.query(range))
+                foundObjects.extend(self.__southwest.query(range))
+                foundObjects.extend(self.__southeast.query(range))
 
             # Ultimately return the found objects of this quadtree and all it's "children"
             return foundObjects

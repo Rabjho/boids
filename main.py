@@ -7,7 +7,7 @@ import sys,pygame as pg
 from entities import *
 import random
 from auxfunctions import State
-from quadtree import Boundary, QuadTree
+from quadtree import Boundary, Quadtree
 import json
 
 # main function running the program, called in the bottom if-statement
@@ -65,8 +65,8 @@ def main(size=(1280, 720), fullscreen=False):
 
 
     # Initializes quadtrees (source in quadtree.py)
-    qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
-    qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
+    qtreeBoids = Quadtree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
+    qtreePredator = Quadtree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
     # Creates list of boids/predators according to how many are set as default w/ values according to the same template
     boids = [Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]) for i in range(activeTemplate["boids"])]
@@ -223,8 +223,8 @@ def main(size=(1280, 720), fullscreen=False):
 # END INPUT HANDLER
 
         # Resets quadtree by overriding old objects
-        qtreeBoids = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
-        qtreePredator = QuadTree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
+        qtreeBoids = Quadtree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreeBoidsCapacity)
+        qtreePredator = Quadtree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
         # Iterates through all predators
         for predator in predators:
