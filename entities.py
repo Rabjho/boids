@@ -21,13 +21,13 @@ class Entity:
         self.walls = True # Could be added to arguments that can be controlled w/ default
 
         self.velocity = pg.Vector2(0,0)
-        self.__clock = pg.time.Clock()
+        self._clock = pg.time.Clock()
 
         # Trail handling
         self.trailing = False
         self.trailColor = pg.Color(150,150,150, 150)
         # self.trailPoints is a list of tuples, which contain the position of each point and a timestamp
-        self.trailPoints = [(self.position, pg.time.get_ticks())]
+        self._trailPoints = [(self.position, pg.time.get_ticks())]
         # The length of the trail in seconds
         self.trailLength = 0.3
 
@@ -37,8 +37,8 @@ class Entity:
     # Live function that is run each frame in main file
     def live(self) -> None:
         # Ticks internal clock
-        self.__clock.tick()
-        self._deltaTime = self.__clock.get_time() / 1000
+        self._clock.tick()
+        self._deltaTime = self._clock.get_time() / 1000
 
         # Defines the angle of the "wings"
         self._rWingVector = self.rotation.rotate(self.angle)
@@ -63,12 +63,14 @@ class Entity:
             gfxdraw.aapolygon(self._surface, self._points, pg.Color(self.color))
         gfxdraw.filled_polygon(self._surface, self._points, pg.Color(self.color))
 
-        # Removes old points in the trail
-        while (pg.time.get_ticks() - self.trailPoints[0][1] > self.trailLength * 1000):
-            self.trailPoints.pop(0)
-        
+
         # Adds the new points in the trail
-        self.trailPoints.append((self.position, pg.time.get_ticks()))
+        self._trailPoints.append((self.position, pg.time.get_ticks()))
+
+        # Remove old points from the trail
+        while (pg.time.get_ticks() - self._trailPoints[0][1] > self.trailLength * 1000):
+            self._trailPoints.pop(0)
+
 
     # Movement handler
     def _movement(self) -> None:
@@ -151,10 +153,10 @@ class Entity:
 
     # Tail renderer that is somewhat poorly made using a list of polygons that is then looped back on itself.
     # The complete list is then spliced a bit to make more efficient as it is very costly on the computer (60 fps -> 30-50 fps w/ 100 boids)
-    def drawTrail(self) -> None:
+    def _drawTrail(self) -> None:
         if (self.trailing or self.demonstrating):
             try:
-                gfxdraw.aapolygon(self._surface, (list(zip(*self.trailPoints))[0][::1]+list(zip(*self.trailPoints))[0][::-1])[::5], self.trailColor)
+                gfxdraw.aapolygon(self._surface, (list(zip(*self._trailPoints))[0][::1]+list(zip(*self._trailPoints))[0][::-1])[::5], self.trailColor)
             except:
                 pass
 
@@ -203,7 +205,7 @@ class Boid(Entity):
     def _draw(self) -> None:
         # Enables demonstration and trail drawing
         self.__demonstrate()
-        self.drawTrail()
+        self._drawTrail()
 
         # Calls parent draw method
         super()._draw()
@@ -395,7 +397,6 @@ class WindPointer(Entity):
 
         # Calls parent constructor method
         super().__init__(surface, pg.Vector2(self.margin, surface.get_height()-self.margin), radius, 0, pg.Vector2(0, 1), antiAliasing)
-
         self.color = "#6b6b8c"
 
     # Modifies live method of parent
