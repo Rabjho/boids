@@ -1,6 +1,4 @@
 # Defines a boundary class that can check whether an object is within its boundaries or whether another boundary intersects it
-
-
 class Boundary():
     # Initializes the boundary with coords to center and total width+height
     def __init__(self, x, y, sizeX, sizeY) -> None:

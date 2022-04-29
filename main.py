@@ -69,8 +69,33 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
     qtreePredator = Quadtree(Boundary(screen.get_width()/2, screen.get_height()/2, screen.get_width()/2, screen.get_height()/2), qtreePredatorCapacity)
 
     # Creates list of boids/predators according to how many are set as default w/ values according to the same template
-    boids = [Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]) for i in range(activeTemplate["boids"])]
-    predators = [Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorSpeedLimit"]) for i in range(activeTemplate["predators"])]
+    boids = [
+        Boid(
+            screen,
+            qtreeBoids, 
+            qtreePredator, 
+            activeTemplate["boidSpeedLimit"], 
+            activeTemplate["boidSize"], 
+            activeTemplate["boidSearchRadius"], 
+            activeTemplate["cohesionStrength"], 
+            activeTemplate["seperationStrength"], 
+            activeTemplate["alignmentStrength"], 
+            activeTemplate["predatorAvoidStrength"], 
+            activeTemplate["predatorAwarenessFactor"]
+        ) 
+        for i in range(activeTemplate["boids"])
+    ]
+
+    predators = [
+        Predator(
+            screen, 
+            qtreePredator, 
+            boids, 
+            activeTemplate["predatorSize"], 
+            activeTemplate["predatorSpeedLimit"]
+        ) 
+        for i in range(activeTemplate["predators"])
+    ]
 
     # Initializes the windpointer
     windArrow = WindPointer(screen, windPointerSize, windPointerWallMargin)
@@ -176,7 +201,21 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
                     # Adds and removes boids according to what's needed
                     if (len(boids) < activeTemplate["boids"]):
                         for i in range(activeTemplate["boids"] - len(boids)):
-                            boids.append(Boid(screen, qtreeBoids, qtreePredator, activeTemplate["boidSpeedLimit"], activeTemplate["boidSize"], activeTemplate["boidSearchRadius"], activeTemplate["cohesionStrength"], activeTemplate["seperationStrength"], activeTemplate["alignmentStrength"], activeTemplate["predatorAvoidStrength"], activeTemplate["predatorAwarenessFactor"]))
+                            boids.append(
+                                Boid(
+                                    screen, 
+                                    qtreeBoids, 
+                                    qtreePredator, 
+                                    activeTemplate["boidSpeedLimit"], 
+                                    activeTemplate["boidSize"], 
+                                    activeTemplate["boidSearchRadius"], 
+                                    activeTemplate["cohesionStrength"], 
+                                    activeTemplate["seperationStrength"], 
+                                    activeTemplate["alignmentStrength"], 
+                                    activeTemplate["predatorAvoidStrength"], 
+                                    activeTemplate["predatorAwarenessFactor"]
+                                )
+                            )
 
                     elif (len(boids) > activeTemplate["boids"]):
                         for i in range(len(boids) - activeTemplate["boids"]):
@@ -185,7 +224,15 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
                     # Adds and removes predators according to what's needed
                     if (len(predators) < activeTemplate["predators"]):
                         for i in range(activeTemplate["predators"] - len(predators)):
-                            predators.append(Predator(screen, qtreePredator, boids, activeTemplate["predatorSize"], activeTemplate["predatorSpeedLimit"]))
+                            predators.append(
+                                Predator(
+                                    screen, 
+                                    qtreePredator, 
+                                    boids, 
+                                    activeTemplate["predatorSize"], 
+                                    activeTemplate["predatorSpeedLimit"]
+                                )
+                            )
 
                     elif (len(predators) > activeTemplate["predators"]):
                         for i in range(len(predators) - activeTemplate["predators"]):

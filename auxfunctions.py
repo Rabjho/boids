@@ -2,7 +2,7 @@ import pygame as pg
 
 # Defines a funtion which returns whether an object is in a circle
 def inCircle(point, circlePos, r) -> bool:
-    return (circlePos.x - point.x) * (circlePos.x - point.x) + (circlePos.y - point.y) * (circlePos.y - point.y) <= r*r
+    return ((circlePos.x - point.x) * (circlePos.x - point.x) + (circlePos.y - point.y) * (circlePos.y - point.y) <= r*r)
 
 # Defines a funtion returning whether a point is within a pie with center, radius and polar angles of each "wing"
 def inPie(point, pieCenter, r, angleStart, angleEnd) -> bool:
@@ -43,7 +43,7 @@ def pointsInPie(pieCenter, r, startVector, endVector) -> list:
 
 
 # Creates a simple state machine that can loop easily through mod (%)
-# Note: Should have been made with as a generator function
+# Note: Should probably have been made with as a generator function
 class State:
     # Initializes the state machine with a given number of modes (aka the maximum number of states)
     def __init__(self, modes) -> None:

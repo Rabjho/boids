@@ -163,7 +163,21 @@ class Entity:
 # Boid class which has inherited the Entity class
 class Boid(Entity):
     # Constructor which initializes variables 
-    def __init__(self, surface, boidsQuadTree, predatorQuadTree, vLimit, radius, searchRadius, cohesionStrength = 3, seperationStrength = 15, alignmentStrength = 7.5, predatorAvoidStrength = 20, predatorAwarenessFactor = 2) -> None:
+    def __init__(
+        self, 
+        surface, 
+        boidsQuadTree, 
+        predatorQuadTree, 
+        vLimit, 
+        radius, 
+        searchRadius, 
+        cohesionStrength = 3, 
+        seperationStrength = 15, 
+        alignmentStrength = 7.5, 
+        predatorAvoidStrength = 20, 
+        predatorAwarenessFactor = 2
+        ) -> None:
+
         # Calls the parent class constructor
         super().__init__(surface, pg.Vector2(0,0), radius)
 
@@ -308,9 +322,17 @@ class Boid(Entity):
         # Checks whether we should be demonstrating
         if (self.demonstrating):
             # Draws boid search radius
-            gfxdraw.filled_polygon(self._surface, pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self._lWingVector, self._rWingVector), self.demonstratePredatorColor)
+            gfxdraw.filled_polygon(
+                self._surface, 
+                pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius * self.predatorAwarenessFactor, self._lWingVector, self._rWingVector), 
+                self.demonstratePredatorColor
+            )
             # Draws predator search radius
-            gfxdraw.filled_polygon(self._surface, pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self._lWingVector, self._rWingVector), self.demonstrateBoidColor)
+            gfxdraw.filled_polygon(
+                self._surface, 
+                pointsInPie(pg.Vector2(self.position.x, self.position.y), self.searchRadius, self._lWingVector, self._rWingVector), 
+                self.demonstrateBoidColor
+            )
 
 # Predator class which inherits Enitity
 class Predator(Entity):
