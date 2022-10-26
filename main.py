@@ -18,7 +18,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
     pg.init()
 
     # Loading templates from templates.json using 'with' to ensure proper exiting of file
-    with open(os.path.dirname(__file__)+"/templates.json", "r") as file:
+    with open("templates.json", "r") as file:
         templates = json.load(file)
 
     # Template handling with a basic state machine
@@ -42,7 +42,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
     # Checks if the game should be started in fullscreen and starts accordingly
     if (fullscreen):
-        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
+        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)  # type: ignore
     else:
         screen = pg.display.set_mode(size, pg.RESIZABLE)
     # Sets window title and icon
@@ -126,7 +126,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
                     fullscreen = not fullscreen
                     if (fullscreen):
                         size = pg.display.get_window_size()
-                        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)
+                        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)  # type: ignore
                     else:
                         screen = pg.display.set_mode(size, pg.RESIZABLE)
 

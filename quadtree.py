@@ -57,6 +57,8 @@ class Quadtree():
             elif (self.__northeast.insert(object)): return True
             elif (self.__southwest.insert(object)): return True
             elif (self.__southeast.insert(object)): return True
+        
+        return False
 
     # Defines subdividing function that creates 4 quadtrees recursively until satisfactory. Also flags this quadtree as divided
     def __subdivide(self):

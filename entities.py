@@ -15,7 +15,7 @@ class Entity:
         self.rotation = rotation
 
         self.angle = 120 # Could be added to arguments that can be controlled w/ default
-        self.color = "#00afb9" # Could be added to arguments that can be controlled w/ default
+        self.color = pg.Color("#00afb9") # Could be added to arguments that can be controlled w/ default
         self.wallMargin = 125 # Could be added to arguments that can be controlled w/ default
         self.antiAliasing = antiAliasing
         self.walls = True # Could be added to arguments that can be controlled w/ default
@@ -119,12 +119,12 @@ class Entity:
                 self.position.y = self._surface.get_height()
 
     # Small random movement script, which makes everything feel more organic
-    def _randomness(self, strength=0) -> pg.Vector2:
+    def _randomness(self, strength=0) -> pg.math.Vector2:
         return pg.Vector2(uniform(-1,1), uniform(-1,1)).normalize() * strength
 
     # Handler for avoiding walls in a way that resembles the entities seeing them.
     # Note that it is not directly simulated but merely and forcefully attempted to make the simulation nicer
-    def _avoidWalls(self, strength=0) -> pg.Vector2:
+    def _avoidWalls(self, strength=0) -> pg.math.Vector2:
         xBoundries = (self.wallMargin, self._surface.get_width() - self.wallMargin)
         yBoundries = (self.wallMargin, self._surface.get_height() - self.wallMargin)
         avoidanceVector = pg.Vector2(0,0)
@@ -145,7 +145,7 @@ class Entity:
         return avoidanceVector
 
     # Wind effect that takes a direction and a speed and returns that vector
-    def _wind(self, direction = pg.Vector2(0,0), strength=0) -> pg.Vector2:
+    def _wind(self, direction = pg.Vector2(0,0), strength=0) -> pg.math.Vector2:
         try:
             return direction.normalize() * strength
         except:
@@ -154,9 +154,9 @@ class Entity:
     # Tail renderer that is somewhat poorly made using a list of polygons that is then looped back on itself.
     # The complete list is then spliced a bit to make more efficient as it is very costly on the computer (60 fps -> 30-50 fps w/ 100 boids)
     def _drawTrail(self) -> None:
-        if (self.trailing or self.demonstrating):
+        if (self.trailing or self.demonstrating):  # type: ignore
             try:
-                gfxdraw.aapolygon(self._surface, (list(zip(*self._trailPoints))[0][::1]+list(zip(*self._trailPoints))[0][::-1])[::5], self.trailColor)
+                gfxdraw.aapolygon(self._surface, (list(zip(*self._trailPoints))[0][::1]+list(zip(*self._trailPoints))[0][::-1])[::5], self.trailColor)  # type: ignore
             except:
                 pass
 
@@ -305,7 +305,7 @@ class Boid(Entity):
         self._bounceOfWalls()
      
     # Defines a tracking function of the mouse
-    def _trackMouse(self) -> pg.Vector2:
+    def _trackMouse(self) -> pg.math.Vector2:
         # Checks whether we should track the mouse
         if (not bool(self._mouseTracking)):
             return pg.Vector2(0,0)
