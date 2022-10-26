@@ -179,7 +179,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
                 # Wind toggle
                 if (event.key == pg.K_w):
-                    logger.logEvent(logger.getUserID("Player1"), f"wind_toggled_{'on' if (not windToggle) else 'off'}")
+                    logger.logEvent(logger.getUserID("Player1"), "wind_toggled", {'on' if (not windToggle) else 'off'})
                     windToggle = not windToggle
 
                 # Wind turning
@@ -190,7 +190,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
                 # Family handling
                 if (event.key > pg.K_0 and event.key <= pg.K_9):
-                    logger.logEvent(logger.getUserID("Player1"), f"changed_family_amount_to_{event.key-48}")
+                    logger.logEvent(logger.getUserID("Player1"), "changed_family_amount", event.key-48)
                     for boid in boids:
                         # This is possible because event.key is an interger and the numberrow is sequential 
                         # if you then subtract 48 from that integer you can get the number on the key.
