@@ -9,6 +9,10 @@ import random
 from auxfunctions import State
 from quadtree import Boundary, Quadtree
 import json
+# import logger
+
+# if (logger.getUserID("Player1") == None):
+    # logger.addUser("Player1")
 
 # main function running the program, called in the bottom if-statement
 # Has default arguments to run the first time and afterwards those arguments are supplied when the game is reset
@@ -42,7 +46,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
     # Checks if the game should be started in fullscreen and starts accordingly
     if (fullscreen):
-        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)  # type: ignore
+        screen = pg.display.set_mode([[i[0], i[1]] for i in pg.display.get_desktop_sizes()][0], pg.FULLSCREEN | pg.RESIZABLE)  # type: ignore
     else:
         screen = pg.display.set_mode(size, pg.RESIZABLE)
     # Sets window title and icon
@@ -100,6 +104,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
     # Initializes the windpointer
     windArrow = WindPointer(screen, windPointerSize, windPointerWallMargin)
 
+
     # Starts game loop
     while True:
         # Iterates the clock at 60 fps
@@ -113,25 +118,30 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
         for event in pg.event.get():
             # Handles exits
             if (event.type == pg.QUIT):
+                # # logger.logEvent(logger.getUserID("System"), "game_exited")
+                # logger.end()
                 sys.exit()
 
             # Handles keypresses
             elif (event.type == pg.KEYDOWN):
                 # Reset
                 if (event.key == pg.K_r):
+                    # # logger.logEvent(logger.getUserID("Player1"), "game_is_reset")
                     main(screen.get_size(), fullscreen, list(templates)[templateController.current])
                 
                 # Fullscreen toggle
                 if ((event.key == pg.K_RETURN and event.mod == pg.KMOD_LALT) or event.key == pg.K_f):
+                    # # logger.logEvent(logger.getUserID("Player1"), "fullscreen_toggled")
                     fullscreen = not fullscreen
                     if (fullscreen):
                         size = pg.display.get_window_size()
-                        screen = pg.display.set_mode(pg.display.get_desktop_sizes()[0], pg.FULLSCREEN | pg.RESIZABLE)  # type: ignore
+                        screen = pg.display.set_mode([[i[0], i[1]] for i in pg.display.get_desktop_sizes()][0], pg.FULLSCREEN | pg.RESIZABLE)  # type: ignore
                     else:
                         screen = pg.display.set_mode(size, pg.RESIZABLE)
 
                 # Demonstration toggle. When turning on chooses closest to mouse or the first in the list of boids
                 if (event.key == pg.K_d):
+                    # # logger.logEvent(logger.getUserID("Player1"), "demo_toggled")
                     if (not demonstrate):
                         activeDemo[1] = pg.Vector2(boids[activeDemo[0]].position).distance_squared_to(pg.Vector2(pg.mouse.get_pos()))
                         for boid in boids:
@@ -145,18 +155,21 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
                 # Changes the mode of the boids i.e. avoids walls and can't go through, noclip or half of each
                 if (event.key == pg.K_m):
                     if (mode.current == 0):                        
+                        # # logger.logEvent(logger.getUserID("Player1"), "mode_changed_to_noclip")
                         for boid in boids:
                             boid.walls = False
                         for predator in predators:
                             predator.walls = False
 
                     elif (mode.current == 1):
+                        # # logger.logEvent(logger.getUserID("Player1"), "mode_changed_to_hybrid")
                         for boid in boids:
                             boid.walls = bool(random.getrandbits(1))
                         for predator in predators:
                             predator.walls = bool(random.getrandbits(1))
 
                     elif (mode.current == 2):
+                        # # logger.logEvent(logger.getUserID("Player1"), "mode_changed_to_walled")
                         for boid in boids:
                             boid.walls = True
                         for predator in predators:
@@ -166,6 +179,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
                 # Wind toggle
                 if (event.key == pg.K_w):
+                    # # logger.logEvent(logger.getUserID("Player1"), "wind_toggled", {'on' if (not windToggle) else 'off'})
                     windToggle = not windToggle
 
                 # Wind turning
@@ -176,6 +190,7 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
                 # Family handling
                 if (event.key > pg.K_0 and event.key <= pg.K_9):
+                    # # logger.logEvent(logger.getUserID("Player1"), "changed_family_amount", event.key-48)
                     for boid in boids:
                         # This is possible because event.key is an interger and the numberrow is sequential 
                         # if you then subtract 48 from that integer you can get the number on the key.
@@ -183,12 +198,14 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
                 # Adds trails to all boids (has performance issues that need to be looked after)
                 if (event.key == pg.K_t):
+                    # # logger.logEvent(logger.getUserID("Player1"), "trails_toggled")
                     for boid in boids:
                         if (not boid.demonstrating):
                             boid.trailing = not boid.trailing
                 
                 # Template controller
                 if (event.key == pg.K_q or event.key == pg.K_e):
+                    # # logger.logEvent(logger.getUserID("Player1"), "template_changed")
                     if (event.key == pg.K_q):
                         templateController.prior()
                     
@@ -296,5 +313,6 @@ def main(size=(1280, 720), fullscreen=False, resetTemplate="default"):
 
 # Assures that file is not run as library but as the main file.
 if (__name__ == "__main__"):
-    print("Started simulation")
+    print("Started game")
+    # # logger.logEvent(logger.getUserID("System"), "game_started")
     main()
