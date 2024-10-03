@@ -362,7 +362,7 @@ class Predator(Entity):
         # Creates variable that controls the range, where within that the predator should also change target
         self._targetSwitchRange = 5
 
-        self.color = "#000000"
+        self.color = "#ffffff"
 
     # Modifies live method of parent
     def live(self, windDirection = pg.Vector2(0, 0), windStrength = 0) -> None:
